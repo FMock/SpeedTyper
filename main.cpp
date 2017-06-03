@@ -2,9 +2,12 @@
 #include<SDL.h>
 #include<GL/glew.h>
 #include<stdio.h>
-#include<string.h>
+#include<string>
 #include<assert.h>
 #include"DrawUtils.h"
+#include"game_data.h"
+#include"sprite.h"
+#include"keystates.h"
 
 /*
 	main.cpp
@@ -13,6 +16,10 @@
 	Author - Frank Mock
 	Project Start Date - 06/2017
 */
+
+typedef Game_Data GD;
+
+Game_Data gameData;
 
 // Set this to true to make the game loop exit.
 char shouldExit = 0;
@@ -23,30 +30,21 @@ unsigned char kbPrevState[SDL_NUM_SCANCODES] = { 0 };
 // The current frame's keyboard state.
 const unsigned char* kbState = NULL;
 
-// Position of the sprite.
-float spritePos[2] = { 10.0f, 10.0f };
+// To get keyboard state via SDL
+const Uint8 *keyState;
 
-// Texture for the sprite.
-GLuint spriteTex;
+// tracks key states
+KeyStates keyStates;
 
-// Size of the sprite.
-int spriteSize[2];
-
-// Game Window Size
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
+//Sprite reference
+Sprite *gem;
 
 // To regulate frame rate
 int previousTime = 0;
 int currentTime = 0;
 float deltaTime = 0.0f;
 
-// To control the speed of the sprite Pixels/Sec
-float spriteSpeedX = 200;
-float spriteSpeedY = 200;
-
-// To get keyboard state
-const Uint8 *keyState;
+std::string testing = "";
 
 int main(void)
 {
@@ -89,17 +87,23 @@ int main(void)
 	}
 
 	// Setup OpenGL state.
-	glViewport(0, 0, 800, 600);
+	glViewport(0, 0, GD::WINDOW_WIDTH, GD::WINDOW_HEIGHT);
 	glMatrixMode(GL_PROJECTION);
-	glOrtho(0, 800, 600, 0, 0, 100);
+	glOrtho(0, GD::WINDOW_WIDTH, GD::WINDOW_HEIGHT, 0, 0, 100);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Game initialization goes here.
-	spriteTex = glTexImageTGAFile("images/gem01.tga", &spriteSize[0], &spriteSize[1]);
+	keyStates = KeyStates();
+	gameData = Game_Data();
 
-	// The game loop.
+	gem = new Sprite("images/gem01.tga", 10, 10);
+	gem->setXSpeed(30.0);  //pixels per second
+	gem->setYSpeed(30.0); // pixels per second
+
+	
+	//********** GAME LOOP *************************************************************
 	kbState = SDL_GetKeyboardState(NULL);
 	while (!shouldExit) {
 
@@ -111,33 +115,38 @@ int main(void)
 		assert(glGetError() == GL_NO_ERROR);
 		memcpy(kbPrevState, kbState, sizeof(kbPrevState));
 
-		// Handle OS message pump.
-		SDL_Event event;
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
-			case SDL_QUIT:
-				shouldExit = 1;
+		// Track Keyboard Presses
+		keyStates.setKeyPressed();
+
+
+		// Loop through key states array and get key that was pressed
+		for(int i = 0; i < 128; i++){
+			if(keyStates.states[i] == 1){
+				std::string temp = SDL_GetKeyName(i);
+				if(temp.compare("Space") == 0)
+					testing.append(" ");
+				else
+					testing.append(SDL_GetKeyName(i));
+				printf(testing.c_str());
+				printf("\n");
 			}
 		}
 
-		keyState = SDL_GetKeyboardState(NULL); // We want status of all the keys
 
 		// Take action if any of arrowkeys are pushed
-		if (keyState[SDL_SCANCODE_RIGHT]) {
-			if(spritePos[0] < WINDOW_WIDTH - spriteSize[0])
-				spritePos[0] += spriteSpeedX * deltaTime;
+		if (kbState[SDL_SCANCODE_RIGHT]) {
+			gem->moveRight();
 		}
-		else if (keyState[SDL_SCANCODE_LEFT]) {
-			if(spritePos[0] > 0)
-				spritePos[0] -= spriteSpeedX * deltaTime;
+		else if (kbState[SDL_SCANCODE_LEFT]) {
+			gem->moveLeft();
 		}
-		else if (keyState[SDL_SCANCODE_UP]) {
-			if(spritePos[1] > 0)
-				spritePos[1] -= spriteSpeedX * deltaTime;
+		else if (kbState[SDL_SCANCODE_UP]) {
+			gem->moveUp();
 		}
-		else if (keyState[SDL_SCANCODE_DOWN]) {
-			if(spritePos[1] < WINDOW_HEIGHT - spriteSize[1])
-				spritePos[1] += spriteSpeedX * deltaTime;
+		else if (kbState[SDL_SCANCODE_DOWN]) {
+			gem->moveDown();
+		}else{
+			gem->stop();
 		}
 
 		// Game logic goes here.
@@ -145,15 +154,25 @@ int main(void)
 			shouldExit = 1;
 		}
 
+		// Updates
+		gem->update(deltaTime);
+
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// Game drawing goes here.
-		glDrawSprite(spriteTex, spritePos[0], spritePos[1], spriteSize[0], spriteSize[1]);
+		gem->draw();
+		//printf(gem->to_string().c_str());
+		//printf(gameData.to_string().c_str());
+		//printf(keyStates.to_string().c_str());
 
+		// Clear all key states
+		keyStates.zeroAllKeyStates();
+		
 		// Present the most recent frame.
 		SDL_GL_SwapWindow(window);
-	}
+
+	} //***** END GAME LOOP ********************************************************
 
 	SDL_Quit();
 
