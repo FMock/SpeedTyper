@@ -8,6 +8,7 @@
 #include"game_data.h"
 #include"sprite.h"
 #include"keystates.h"
+#include"TextBlock.h"
 
 /*
 	main.cpp
@@ -37,7 +38,7 @@ const Uint8 *keyState;
 KeyStates keyStates;
 
 //Sprite reference
-Sprite *gem;
+TextBlock *textBlock;
 
 // To regulate frame rate
 int previousTime = 0;
@@ -98,9 +99,9 @@ int main(void)
 	keyStates = KeyStates();
 	gameData = Game_Data();
 
-	gem = new Sprite("images/gem01.tga", 10, 10);
-	gem->setXSpeed(30.0);  //pixels per second
-	gem->setYSpeed(30.0); // pixels per second
+	textBlock = new TextBlock(10, 10, 10, 10, "220");
+	//textBlock->setXSpeed(30.0);  //pixels per second
+	//textBlock->setYSpeed(30.0); // pixels per second
 
 	
 	//********** GAME LOOP *************************************************************
@@ -115,7 +116,7 @@ int main(void)
 		assert(glGetError() == GL_NO_ERROR);
 		memcpy(kbPrevState, kbState, sizeof(kbPrevState));
 
-		// Track Keyboard Presses
+		// Register any keys pressed in tracking array
 		keyStates.setKeyPressed();
 
 
@@ -123,30 +124,38 @@ int main(void)
 		for(int i = 0; i < 128; i++){
 			if(keyStates.states[i] == 1){
 				std::string temp = SDL_GetKeyName(i);
-				if(temp.compare("Space") == 0)
+				//printf(temp.c_str());
+				if(temp.compare("Return") == 0){
+					testing = "";
+				}else if(temp.compare("Space") == 0){
 					testing.append(" ");
-				else
+				}else if(temp.compare("Backspace") == 0){
+					testing = testing.substr(0, testing.size()-1);
+				}else{
 					testing.append(SDL_GetKeyName(i));
+				}
+
 				printf(testing.c_str());
 				printf("\n");
+				
 			}
 		}
 
 
 		// Take action if any of arrowkeys are pushed
 		if (kbState[SDL_SCANCODE_RIGHT]) {
-			gem->moveRight();
+			textBlock->moveRight();
 		}
 		else if (kbState[SDL_SCANCODE_LEFT]) {
-			gem->moveLeft();
+			textBlock->moveLeft();
 		}
 		else if (kbState[SDL_SCANCODE_UP]) {
-			gem->moveUp();
+			textBlock->moveUp();
 		}
 		else if (kbState[SDL_SCANCODE_DOWN]) {
-			gem->moveDown();
+			textBlock->moveDown();
 		}else{
-			gem->stop();
+			textBlock->stop();
 		}
 
 		// Game logic goes here.
@@ -155,18 +164,18 @@ int main(void)
 		}
 
 		// Updates
-		gem->update(deltaTime);
+		textBlock->update(deltaTime);
 
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// Game drawing goes here.
-		gem->draw();
+		textBlock->draw();
 		//printf(gem->to_string().c_str());
 		//printf(gameData.to_string().c_str());
 		//printf(keyStates.to_string().c_str());
 
-		// Clear all key states
+		// Clear all key states in key state tracking array
 		keyStates.zeroAllKeyStates();
 		
 		// Present the most recent frame.

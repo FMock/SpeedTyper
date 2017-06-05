@@ -24,6 +24,12 @@ void KeyStates::setKeyPressed(){
 		switch (event.type) {
 		case SDL_KEYUP:
 			switch(event.key.keysym.sym){
+			case SDLK_RETURN:
+				states[SDLK_RETURN] += 1;
+				break;
+			case SDLK_BACKSPACE:
+				states[SDLK_BACKSPACE] += 1;
+				break;
 			case SDLK_SPACE:
 				states[SDLK_SPACE] += 1;
 				break;
