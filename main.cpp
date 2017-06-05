@@ -9,6 +9,10 @@
 #include"sprite.h"
 #include"keystates.h"
 #include"TextBlock.h"
+#include<fmod.hpp> // For Sound Functionality
+#include<time.h>
+#include"timer.h"
+#include<vector>
 
 /*
 	main.cpp
@@ -37,8 +41,14 @@ const Uint8 *keyState;
 // tracks key states
 KeyStates keyStates;
 
+// Sprite Amount Constants
+const int NUM_BLOCKS = 10;
+
+// Containers for sprites
+std::vector<TextBlock *> blocks = std::vector<TextBlock *>();
+
 //Sprite reference
-TextBlock *textBlock;
+//TextBlock *textBlock;
 
 // To regulate frame rate
 int previousTime = 0;
@@ -46,6 +56,8 @@ int currentTime = 0;
 float deltaTime = 0.0f;
 
 std::string testing = "";
+
+Timer timer;
 
 int main(void)
 {
@@ -99,14 +111,23 @@ int main(void)
 	keyStates = KeyStates();
 	gameData = Game_Data();
 
-	textBlock = new TextBlock(10, 10, 10, 10, "220");
-	//textBlock->setXSpeed(30.0);  //pixels per second
-	//textBlock->setYSpeed(30.0); // pixels per second
+	timer = Timer(SDL_GetTicks());
 
 	
 	//********** GAME LOOP *************************************************************
 	kbState = SDL_GetKeyboardState(NULL);
 	while (!shouldExit) {
+
+		// Create a TextBlock every 4 seconds
+		if(timer.count == 4 && blocks.size() < NUM_BLOCKS){
+			srand (SDL_GetTicks());
+			int xpos = rand() % 600 + 50;
+			int ypos = 0;
+			blocks.push_back(new TextBlock(xpos, ypos, 10, 10, "220"));
+		}
+
+		if(timer.count == 4)
+			timer.reSet();
 
 		// Find out how many seconds have past since last loop iteration
 		previousTime = currentTime;
@@ -144,18 +165,18 @@ int main(void)
 
 		// Take action if any of arrowkeys are pushed
 		if (kbState[SDL_SCANCODE_RIGHT]) {
-			textBlock->moveRight();
+			//textBlock->moveRight();
 		}
 		else if (kbState[SDL_SCANCODE_LEFT]) {
-			textBlock->moveLeft();
+			//textBlock->moveLeft();
 		}
 		else if (kbState[SDL_SCANCODE_UP]) {
-			textBlock->moveUp();
+			//textBlock->moveUp();
 		}
 		else if (kbState[SDL_SCANCODE_DOWN]) {
-			textBlock->moveDown();
+			//textBlock->moveDown();
 		}else{
-			textBlock->stop();
+			//textBlock->stop();
 		}
 
 		// Game logic goes here.
@@ -163,18 +184,28 @@ int main(void)
 			shouldExit = 1;
 		}
 
-		// Updates
-		textBlock->update(deltaTime);
+		//************* Updates  **************************************************
+
+		timer.update();
+
+		// update TextBlocks
+		for(int i = 0; i < blocks.size(); i++){
+			blocks.at(i)->update(deltaTime);
+		}
+		
 
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// Game drawing goes here.
-		textBlock->draw();
+		//*********** Game drawing goes here ****************************************
+		for(int i = 0; i < blocks.size(); i++){
+			blocks.at(i)->draw();
+		}
+		//textBlock->draw();
 		//printf(gem->to_string().c_str());
 		//printf(gameData.to_string().c_str());
 		//printf(keyStates.to_string().c_str());
-
+		//printf(timer.to_string().c_str());
 		// Clear all key states in key state tracking array
 		keyStates.zeroAllKeyStates();
 		
