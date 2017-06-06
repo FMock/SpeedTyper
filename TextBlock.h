@@ -3,6 +3,7 @@
 #define HIT_H
 #include"sprite.h"
 #include<map>
+#include<vector>
 #include"game_data.h"
 #include <sstream>
 
@@ -17,6 +18,9 @@ public:
 	TextBlock(int, int, int, int, std::string);
 
 	std::map<std::string, GLuint> strToImageMap;
+	std::vector<std::string> colors;
+
+	std::string color;
 	
 	std::string text; // the text to be displayed on the block
 

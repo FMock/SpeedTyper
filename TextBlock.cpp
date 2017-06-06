@@ -14,6 +14,9 @@ enum Direction{LEFT, RIGHT, UP, DOWN };
 
 TextBlock::TextBlock(int x, int y, int w, int h, std::string s):Sprite(x, y, w, h){
 	type = "TextBlock";
+	colors.push_back("red"), colors.push_back("blue"), colors.push_back("green");
+	colors.push_back("yellow"), colors.push_back("purple");
+	color = colors.at(rand() % 5);
 	fontWidth = 20;
 	text = s;
 	collieded = false;
@@ -52,7 +55,7 @@ void TextBlock::loadImages(){
 
 // Draw the textBlock to the screen
 void TextBlock::draw(){
-	glDrawSprite(strToImageMap["purple"],  characterPos[0], characterPos[1], characterSize[0], characterSize[1]);
+	glDrawSprite(strToImageMap[color],  characterPos[0], characterPos[1], characterSize[0], characterSize[1]);
 
 	// For each character of text, get it's corresponding image from the map and draw it
 	int offset = 0;
