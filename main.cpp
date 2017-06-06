@@ -13,6 +13,8 @@
 #include<time.h>
 #include"timer.h"
 #include<vector>
+#include<iostream>
+#include<fstream>
 
 /*
 	main.cpp
@@ -44,20 +46,26 @@ KeyStates keyStates;
 // Sprite Amount Constants
 const int NUM_BLOCKS = 10;
 
-// Containers for sprites
+// Containers
 std::vector<TextBlock *> blocks = std::vector<TextBlock *>();
-
-//Sprite reference
-//TextBlock *textBlock;
+std::vector<std::string> words = std::vector<std::string>();
 
 // To regulate frame rate
 int previousTime = 0;
 int currentTime = 0;
 float deltaTime = 0.0f;
 
+int wordCount = 0;
+std::ifstream inFile; // to read the words from file
+std::string fileName = "words.txt";
 std::string testing = "";
 
 Timer timer;
+int blockInterval = 4; // Interval in seconds at which a new block appears
+
+// Function protoTypes
+void readWords(std::ifstream &in);
+bool AABBIntersect(AABB box1, AABB box2);
 
 int main(void)
 {
@@ -107,7 +115,17 @@ int main(void)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// Game initialization goes here.
+	//********** Game initialization goes here. **********************
+
+	// Read in the words from text file
+	inFile.open(fileName);
+	if(inFile.fail()){
+		printf("Error opening word file %s ", fileName.c_str());
+		SDL_Quit();
+		return 1;
+	}
+	readWords(inFile);
+
 	keyStates = KeyStates();
 	gameData = Game_Data();
 
@@ -118,15 +136,16 @@ int main(void)
 	kbState = SDL_GetKeyboardState(NULL);
 	while (!shouldExit) {
 
-		// Create a TextBlock every 4 seconds
-		if(timer.count == 4 && blocks.size() < NUM_BLOCKS){
+		// Create a TextBlock every 4 seconds. blockInterval = 4
+		if(timer.count == blockInterval && blocks.size() < NUM_BLOCKS){
 			srand (SDL_GetTicks());
 			int xpos = rand() % 600 + 50;
 			int ypos = 0;
-			blocks.push_back(new TextBlock(xpos, ypos, 10, 10, "220"));
+			int i = rand() % wordCount; // used to get a random word for a block
+			blocks.push_back(new TextBlock(xpos, ypos, 10, 10, words.at(i)));
 		}
 
-		if(timer.count == 4)
+		if(timer.count == blockInterval)
 			timer.reSet();
 
 		// Find out how many seconds have past since last loop iteration
@@ -217,4 +236,40 @@ int main(void)
 	SDL_Quit();
 
 	return 0;
+}
+
+/*
+* Checks AABB/AABB collisions
+*/
+bool AABBIntersect(AABB box1, AABB box2){
+	//box1 to the right
+	if(box1.x > box2.x + box2.w){
+		return false;
+	}
+
+	// box1 top the left
+	if(box1.x + box1.w < box2.x){
+		return false;
+	}
+
+	// box1 below
+	if(box1.y > box2.y + box2.h){
+		return false;
+	}
+
+	// box1 above
+	if(box1.y + box1.h < box2.y){
+		return false;
+	}
+	
+	return true;
+}
+
+// Reads the words from text file and stores them in a String vector
+void readWords(std::ifstream &in){
+	std::string temp;
+	while(in >> temp){
+		words.push_back(temp);
+		wordCount ++;
+	}
 }
