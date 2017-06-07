@@ -65,6 +65,7 @@ int blockInterval = 4; // Interval in seconds at which a new block appears
 
 // Function protoTypes
 void readWords(std::ifstream &in);
+void readLines(std::ifstream &in);
 bool AABBIntersect(AABB box1, AABB box2);
 
 int main(void)
@@ -124,7 +125,7 @@ int main(void)
 		SDL_Quit();
 		return 1;
 	}
-	readWords(inFile);
+	readLines(inFile);
 
 	keyStates = KeyStates();
 	gameData = Game_Data();
@@ -142,7 +143,7 @@ int main(void)
 			int xpos = rand() % 600 + 50;
 			int ypos = 0;
 			int i = rand() % wordCount; // used to get a random word for a block
-			blocks.push_back(new TextBlock(xpos, ypos, 10, 10, words.at(i)));
+			blocks.push_back(new TextBlock(xpos, ypos, 30, 30, words.at(i)));
 		}
 
 		if(timer.count == blockInterval)
@@ -270,6 +271,15 @@ void readWords(std::ifstream &in){
 	std::string temp;
 	while(in >> temp){
 		words.push_back(temp);
+		wordCount ++;
+	}
+}
+
+// Reads lines from text file and stores them in a String vector
+void readLines(std::ifstream &in){
+	std::string line;
+	while (std::getline(in, line)){
+		words.push_back(line);
 		wordCount ++;
 	}
 }
