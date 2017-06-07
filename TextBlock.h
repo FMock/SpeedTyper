@@ -25,6 +25,7 @@ public:
 	std::string text; // the text to be displayed on the block
 
 	int fontWidth;
+	int fontHeight;
 
 	// The direction the character is facing
 	int direction;
