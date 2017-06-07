@@ -26,6 +26,10 @@ public:
 	static const int WINDOW_HEIGHT = 600;  // Camera Height
 	static const int WORLD_WIDTH = 800;
 	static const int WORLD_HEIGHT = 600;
+	static const int BORDER_WIDTH = 20;
+	static const int BLOCK_AREA_WIDTH = 500;
+	static const int BLOCK_AREA_TO_RH_EDGE = 300;
+	static const int BL_FLOOR_TO_BOTTOM = 100;
 
 	int currentGameState;
 	int score;

@@ -1,11 +1,12 @@
 #pragma once
-#ifndef HIT_H
-#define HIT_H
+#ifndef TEXTBLOCK_H
+#define TEXTBLOCK_H
 #include"sprite.h"
 #include<map>
 #include<vector>
 #include"game_data.h"
 #include <sstream>
+#include<ctime>
 
 // Author - Frank Mock
 // TextBlock.h
@@ -34,16 +35,16 @@ public:
 
 	int prev_change_y;
 
-	// If x and y velocity is 0
-	bool stopped;
+	// If x and y velocity is not 0
+	bool moving;
 
-	bool collieded;
+	bool collided;
 
 	// True when hit by any enemy
 	bool isHit;
 
-	// If True remove skeleton from game
-	bool isDead;
+	// If True remove TextBlock from game
+	bool remove;
 
 	// load images of blocks and text
 	void loadImages();
