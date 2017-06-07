@@ -17,18 +17,18 @@ TextBlock::TextBlock(int x, int y, int w, int h, std::string s):Sprite(x, y, w, 
 	colors.push_back("white"), colors.push_back("blue"), colors.push_back("green");
 	colors.push_back("yellow"), colors.push_back("purple"), colors.push_back("red");
 	colors.push_back("orange");
+	srand(time(0));
 	color = colors.at(rand() % 7);
 	fontWidth = 23;
 	fontHeight = 25;
 	text = s;
-	collieded = false;
-	isDead = false;
+	collided = false;
+	remove = false;
 	isHit = false;
+	moving = true;
+	direction = DOWN;
 	box.setW(characterSize[0]);
 	box.setH(characterSize[1]);
-
-	direction = DOWN;
-	stopped = true;
 	loadImages();
 	setWidth(100);
 	setHeight(25);
@@ -163,36 +163,41 @@ void TextBlock::draw(){
 }
 
 void TextBlock::update(float deltaTime){
-	moveDown();
+	if(moving){
+		moveDown();
 
-	if(characterPos[0] > GD::WORLD_WIDTH - characterSize[0]){
-		change_x = 0; //stop block from going out of bounds right
-		characterPos[0] -= 1;
+		if(characterPos[0] > GD::WORLD_WIDTH - characterSize[0] - GD::BLOCK_AREA_TO_RH_EDGE){
+			change_x = 0; //stop block from going out of bounds (right boundry)
+			characterPos[0] -= 1;
+		}
+
+		if(characterPos[0] < 0){
+			change_x = 0; //stop block from going out of bounds (left boundry)
+			characterPos[0] += 1;
+		}
+
+		if(characterPos[1] < 0){
+			change_y = 0; //stop block from going out of bounds up (upper boundry)
+			characterPos[1] += 1;
+		}
+
+		if(characterPos[1] > GD::WORLD_HEIGHT - characterSize[1] - GD::BL_FLOOR_TO_BOTTOM){
+			change_y = 0; //stop block from going out of bounds up (lower boundry)
+			characterPos[1] -= 1;
+			moving = false;
+		}
+
+		characterPos[0] += change_x * deltaTime;
+		box.setX(abs(characterPos[0]));
+		characterPos[1] += change_y * deltaTime;
+		box.setY(abs(characterPos[1]));
+	}else{
+		stop();
 	}
-
-	if(characterPos[0] < 0){
-		change_x = 0; //stop block from going out of bounds left
-		characterPos[0] += 1;
-	}
-
-	if(characterPos[1] < 0){
-		change_y = 0; //stop block from going out of bounds up
-		characterPos[1] += 1;
-	}
-
-	if(characterPos[1] > GD::WORLD_HEIGHT - characterSize[1]){
-		change_y = 0; //stop block from going out of bounds up
-		characterPos[1] -= 1;
-	}
-
-	characterPos[0] += change_x * deltaTime;
-	box.setX(abs(characterPos[0]));
-	characterPos[1] += change_y * deltaTime;
-	box.setY(abs(characterPos[1]));
 }
 
 void TextBlock::moveLeft(){
-	stopped = false;
+	moving = true;
 	prev_change_y = change_y;
 	change_y = 0;
 	prev_change_x = change_x;
@@ -201,7 +206,7 @@ void TextBlock::moveLeft(){
 }
 
 void TextBlock::moveRight(){
-	stopped = false;
+	moving = true;
 	prev_change_y = change_y;
 	change_y = 0;
 	prev_change_x = change_x;
@@ -210,7 +215,7 @@ void TextBlock::moveRight(){
 }
 
 void TextBlock::moveUp(){
-	stopped = false;
+	moving = true;
 	prev_change_x = change_x;
 	change_x = 0;
 	prev_change_y = change_y;
@@ -219,7 +224,7 @@ void TextBlock::moveUp(){
 }
 
 void TextBlock::moveDown(){
-	stopped = false;
+	moving = true;
 	prev_change_x = change_x;
 	change_x = 0;
 	prev_change_y = change_y;
@@ -228,7 +233,7 @@ void TextBlock::moveDown(){
 }
 
 void TextBlock::stop(){
-	stopped = true;
+	moving = false;
 	prev_change_x = change_x;
 	change_x = 0;
 	prev_change_y = change_y;
@@ -236,14 +241,15 @@ void TextBlock::stop(){
 }
 
 void TextBlock::collision(Sprite &sprite){
-	collieded = true;
+	collided = true;
 }
 
 
 std::string TextBlock::to_string() const{
 	ostringstream oss;
 	oss << "TextBlock ************\n"
-		<< "isDead = " << isDead << "\n"
+		<< "isDead = " << remove << "\n"
+		<< "moving = " << moving << "\n"
 		<< "Direction = " << direction << "\n"
 		<< "isHit = "  << isHit << "\n"
 		<< "AABB x = " << box.x << "\n"

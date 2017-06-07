@@ -15,6 +15,7 @@
 #include<vector>
 #include<iostream>
 #include<fstream>
+#include"gui.h"
 
 /*
 	main.cpp
@@ -44,11 +45,14 @@ const Uint8 *keyState;
 KeyStates keyStates;
 
 // Sprite Amount Constants
-const int NUM_BLOCKS = 10;
+const int NUM_BLOCKS = 20;
 
 // Containers
 std::vector<TextBlock *> blocks = std::vector<TextBlock *>();
 std::vector<std::string> words = std::vector<std::string>();
+
+// Objects
+GUI *gui;
 
 // To regulate frame rate
 int previousTime = 0;
@@ -127,6 +131,7 @@ int main(void)
 	}
 	readLines(inFile);
 
+	gui = new GUI();
 	keyStates = KeyStates();
 	gameData = Game_Data();
 
@@ -137,22 +142,12 @@ int main(void)
 	kbState = SDL_GetKeyboardState(NULL);
 	while (!shouldExit) {
 
-		// Create a TextBlock every 4 seconds. blockInterval = 4
-		if(timer.count == blockInterval && blocks.size() < NUM_BLOCKS){
-			srand (SDL_GetTicks());
-			int xpos = rand() % 600 + 50;
-			int ypos = 0;
-			int i = rand() % wordCount; // used to get a random word for a block
-			blocks.push_back(new TextBlock(xpos, ypos, 30, 30, words.at(i)));
-		}
-
-		if(timer.count == blockInterval)
-			timer.reSet();
-
-		// Find out how many seconds have past since last loop iteration
+		// Find out how much time has past since last loop iteration
 		previousTime = currentTime;
 		currentTime = SDL_GetTicks();
 		deltaTime = (currentTime - previousTime) / 1000.0f;
+
+		//*********** Get Player Input ***************************************
 
 		assert(glGetError() == GL_NO_ERROR);
 		memcpy(kbPrevState, kbState, sizeof(kbPrevState));
@@ -204,28 +199,57 @@ int main(void)
 			shouldExit = 1;
 		}
 
-		//************* Updates  **************************************************
+		// ************* Do Updates  **************************************************
+		gui->update(deltaTime);
+
+		// Create a TextBlock every 4 seconds. blockInterval = 4
+		if(timer.count == blockInterval && blocks.size() < NUM_BLOCKS){
+			srand (SDL_GetTicks());
+			int xpos = rand() % GD::BLOCK_AREA_WIDTH + GD::BORDER_WIDTH;
+			int ypos = 0;
+			int i = rand() % wordCount; // used to get a random word for a block
+			blocks.push_back(new TextBlock(xpos, ypos, 30, 30, words.at(i)));
+		}
+
+		if(timer.count == blockInterval)
+			timer.reSet();
 
 		timer.update();
 
 		// update TextBlocks
 		for(int i = 0; i < blocks.size(); i++){
 			blocks.at(i)->update(deltaTime);
+
+			// If a block is moving, check for collisons
+			if(blocks.at(i)->moving && i > 0){
+				// Check for collisons with blocks in lower index
+				for(int j =  i - 1; j >= 0; j--){
+					if(AABBIntersect(blocks.at(i)->getBox(), blocks.at(j)->getBox())){
+						blocks.at(i)->moving = false;
+					}
+				}
+			}
 		}
 		
+		//*********** Drawing **********************************************************
+		glClearColor(0, 0, 0, 1);  
+		glClear(GL_COLOR_BUFFER_BIT); // Be sure to always draw objects after this
 
-		glClearColor(0, 0, 0, 1);
-		glClear(GL_COLOR_BUFFER_BIT);
+		gui->draw();
 
-		//*********** Game drawing goes here ****************************************
 		for(int i = 0; i < blocks.size(); i++){
 			blocks.at(i)->draw();
 		}
-		//textBlock->draw();
+
+		//*********** Troubleshooting *************************************************
+
 		//printf(gem->to_string().c_str());
 		//printf(gameData.to_string().c_str());
 		//printf(keyStates.to_string().c_str());
 		//printf(timer.to_string().c_str());
+		//if(blocks.size() > 0)
+			//printf(blocks.at(0)->to_string().c_str());
+
 		// Clear all key states in key state tracking array
 		keyStates.zeroAllKeyStates();
 		
