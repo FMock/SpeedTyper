@@ -18,6 +18,7 @@ public:
 	void loadImages();
 	GLuint logo;
 	GLuint cloudBackground;
+	GLuint textTypeArea;
 	GLuint vertBorder;
 	GLuint horzBorder;
 	int width;

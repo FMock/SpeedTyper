@@ -16,6 +16,7 @@
 #include<iostream>
 #include<fstream>
 #include"gui.h"
+#include"TextWriter.h"
 
 /*
 	main.cpp
@@ -56,6 +57,7 @@ int font_height = 30;
 
 // Objects
 GUI *gui;
+TextWriter *textWriter;
 
 // To regulate frame rate
 int previousTime = 0;
@@ -247,7 +249,7 @@ int main(void)
 	gui = new GUI();
 	keyStates = KeyStates();
 	gameData = Game_Data();
-
+	textWriter = new TextWriter(testing, stringToImageMap);
 	timer = Timer(SDL_GetTicks());
 
 	
@@ -314,6 +316,7 @@ int main(void)
 
 		// ************* Do Updates  **************************************************
 		gui->update(deltaTime);
+		textWriter->update(testing);
 
 		// Create a TextBlock every 4 seconds. blockInterval = 4
 		if(timer.count == blockInterval && blocks.size() < NUM_BLOCKS){
@@ -356,6 +359,7 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT); // Be sure to always draw objects after this
 
 		gui->draw();
+		textWriter->draw();
 
 		for(int i = 0; i < blocks.size(); i++){
 			blocks.at(i)->draw();
