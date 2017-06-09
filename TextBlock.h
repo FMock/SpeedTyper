@@ -16,9 +16,10 @@
 class TextBlock : public Sprite{
 public:
 	TextBlock():Sprite(){}
-	TextBlock(int, int, int, int, std::string);
+	TextBlock(int, int, int, int, std::string, std::map<std::string, GLuint>& tMap);
 
 	std::map<std::string, GLuint> strToImageMap;
+	
 	std::vector<std::string> colors;
 
 	std::string color;
@@ -45,9 +46,6 @@ public:
 
 	// If True remove TextBlock from game
 	bool remove;
-
-	// load images of blocks and text
-	void loadImages();
 
 	void update(float deltaTime);
 

@@ -50,6 +50,9 @@ const int NUM_BLOCKS = 24;
 // Containers
 std::vector<TextBlock *> blocks = std::vector<TextBlock *>();
 std::vector<std::string> words = std::vector<std::string>();
+std::map<std::string, GLuint> stringToImageMap;
+int font_width = 30;
+int font_height = 30;
 
 // Objects
 GUI *gui;
@@ -131,6 +134,116 @@ int main(void)
 	}
 	readLines(inFile);
 
+
+	/*Initialize the stringToImageMap
+	* TextBlock and TextWriter objects will share this map
+	*/
+	GLuint red = glTexImageTGAFile("images/red_block.tga", &font_width, &font_height);  // red
+	stringToImageMap["red"] = red;
+	GLuint blue = glTexImageTGAFile("images/blue_block.tga", &font_width, &font_height);  // blue
+	stringToImageMap["blue"] = blue;
+	GLuint green = glTexImageTGAFile("images/green_block.tga", &font_width, &font_height);  // green
+	stringToImageMap["green"] = green;
+	GLuint yellow = glTexImageTGAFile("images/yellow_block.tga", &font_width, &font_height);  // yellow
+	stringToImageMap["yellow"] = yellow;
+	GLuint purple = glTexImageTGAFile("images/purple_block.tga", &font_width, &font_height);  // purple
+	stringToImageMap["purple"] = purple;
+	GLuint white = glTexImageTGAFile("images/white_block.tga", &font_width, &font_height);  // white
+	stringToImageMap["white"] = white;
+	GLuint orange = glTexImageTGAFile("images/orange_block.tga", &font_width, &font_height);  // orange
+	stringToImageMap["orange"] = orange;
+	GLuint zero = glTexImageTGAFile("images/num0.tga", &font_width,&font_height); // 0
+	stringToImageMap["0"] = zero;
+	GLuint one = glTexImageTGAFile("images/num1.tga", &font_width,&font_height);  // 1
+	stringToImageMap["1"] = one;
+	GLuint two = glTexImageTGAFile("images/num2.tga", &font_width,&font_height);  // 2
+	stringToImageMap["2"] = two;
+	GLuint three = glTexImageTGAFile("images/num3.tga", &font_width,&font_height);  // 3
+	stringToImageMap["3"] = three;
+	GLuint four = glTexImageTGAFile("images/num4.tga", &font_width,&font_height);  // 4
+	stringToImageMap["4"] = four;
+	GLuint five = glTexImageTGAFile("images/num5.tga", &font_width,&font_height);  // 5
+	stringToImageMap["5"] = five;
+	GLuint six = glTexImageTGAFile("images/num6.tga", &font_width,&font_height);  // 6
+	stringToImageMap["6"] = six;
+	GLuint seven = glTexImageTGAFile("images/num7.tga", &font_width,&font_height);  // 7
+	stringToImageMap["7"] = seven;
+	GLuint eight = glTexImageTGAFile("images/num8.tga", &font_width,&font_height);  // 8
+	stringToImageMap["8"] = eight;
+	GLuint nine = glTexImageTGAFile("images/num9.tga", &font_width,&font_height);  // 9
+	stringToImageMap["9"] = nine;
+	GLuint A = glTexImageTGAFile("images/a.tga", &font_width,&font_height);  // A
+	stringToImageMap["A"] = A;
+	GLuint B = glTexImageTGAFile("images/b.tga", &font_width,&font_height);  // B
+	stringToImageMap["B"] = B;
+	GLuint C = glTexImageTGAFile("images/c.tga", &font_width,&font_height);  // C
+	stringToImageMap["C"] = C;
+	GLuint D = glTexImageTGAFile("images/d.tga", &font_width,&font_height);  // D
+	stringToImageMap["D"] = D;
+	GLuint E = glTexImageTGAFile("images/e.tga", &font_width,&font_height);  // E
+	stringToImageMap["E"] = E;
+	GLuint F = glTexImageTGAFile("images/f.tga", &font_width,&font_height);  // F
+	stringToImageMap["F"] = F;
+	GLuint G = glTexImageTGAFile("images/g.tga", &font_width,&font_height);  // G
+	stringToImageMap["G"] = G;
+	GLuint H = glTexImageTGAFile("images/h.tga", &font_width,&font_height);  // H
+	stringToImageMap["H"] = H;
+	GLuint I = glTexImageTGAFile("images/i.tga", &font_width,&font_height);  // I
+	stringToImageMap["I"] = I;
+	GLuint J = glTexImageTGAFile("images/j.tga", &font_width,&font_height);  // J
+	stringToImageMap["J"] = J;
+	GLuint K = glTexImageTGAFile("images/k.tga", &font_width,&font_height);  // K
+	stringToImageMap["K"] = K;
+	GLuint L = glTexImageTGAFile("images/l.tga", &font_width,&font_height);  // L
+	stringToImageMap["L"] = L;
+	GLuint M = glTexImageTGAFile("images/m.tga", &font_width,&font_height);  // M
+	stringToImageMap["M"] = M;
+	GLuint N = glTexImageTGAFile("images/n.tga", &font_width,&font_height);  // N
+	stringToImageMap["N"] = N;
+	GLuint O = glTexImageTGAFile("images/o.tga", &font_width,&font_height);  // O
+	stringToImageMap["O"] = O;
+	GLuint P = glTexImageTGAFile("images/p.tga", &font_width,&font_height);  // P
+	stringToImageMap["P"] = P;
+	GLuint Q = glTexImageTGAFile("images/q.tga", &font_width,&font_height);  // Q
+	stringToImageMap["Q"] = Q;
+	GLuint R = glTexImageTGAFile("images/r.tga", &font_width,&font_height);  // R
+	stringToImageMap["R"] = R;
+	GLuint S = glTexImageTGAFile("images/s.tga", &font_width,&font_height);  // S
+	stringToImageMap["S"] = S;
+	GLuint T = glTexImageTGAFile("images/t.tga", &font_width,&font_height);  // T
+	stringToImageMap["T"] = T;
+	GLuint U = glTexImageTGAFile("images/u.tga", &font_width,&font_height);  // U
+	stringToImageMap["U"] = U;
+	GLuint V = glTexImageTGAFile("images/v.tga", &font_width,&font_height);  // V
+	stringToImageMap["V"] = V;
+	GLuint W = glTexImageTGAFile("images/w.tga", &font_width,&font_height);  // W
+	stringToImageMap["W"] = W;
+	GLuint X = glTexImageTGAFile("images/x.tga", &font_width,&font_height);  // X
+	stringToImageMap["X"] = X;
+	GLuint Y = glTexImageTGAFile("images/y.tga", &font_width,&font_height);  // Y
+	stringToImageMap["Y"] = Y;
+	GLuint Z = glTexImageTGAFile("images/z.tga", &font_width,&font_height);  // Z
+	stringToImageMap["Z"] = Z;
+	GLuint dollar = glTexImageTGAFile("images/dollarsign.tga", &font_width,&font_height);  // $
+	stringToImageMap["$"] = dollar;
+	GLuint exclamation = glTexImageTGAFile("images/exclamation.tga", &font_width,&font_height);  // !
+	stringToImageMap["!"] = exclamation;
+	GLuint hashtag = glTexImageTGAFile("images/hashtag.tga", &font_width,&font_height);  // #
+	stringToImageMap["#"] = hashtag;
+	GLuint minus = glTexImageTGAFile("images/minussign.tga", &font_width,&font_height);  // -
+	stringToImageMap["-"] = minus;
+	GLuint plus = glTexImageTGAFile("images/plussign.tga", &font_width,&font_height);  // +
+	stringToImageMap["+"] = plus;
+	GLuint percent = glTexImageTGAFile("images/percentsign.tga", &font_width,&font_height);  // %
+	stringToImageMap["%"] = percent;
+	GLuint equal = glTexImageTGAFile("images/equal.tga", &font_width,&font_height);  // =
+	stringToImageMap["="] = equal;
+	GLuint question = glTexImageTGAFile("images/question.tga", &font_width,&font_height);  // ?
+	stringToImageMap["?"] = question;
+	GLuint space = glTexImageTGAFile("images/space.tga", &font_width,&font_height);  // <blank space>
+	stringToImageMap[""] = space;
+
+
 	gui = new GUI();
 	keyStates = KeyStates();
 	gameData = Game_Data();
@@ -208,7 +321,7 @@ int main(void)
 			int xpos = rand() % GD::BLOCK_AREA_WIDTH + GD::BORDER_WIDTH;
 			int ypos = 0;
 			int i = rand() % wordCount; // used to get a random word for a block
-			blocks.push_back(new TextBlock(xpos, ypos, 30, 30, words.at(i)));
+			blocks.push_back(new TextBlock(xpos, ypos, 30, 30, words.at(i), stringToImageMap));
 		}
 
 		if(timer.count == blockInterval)
