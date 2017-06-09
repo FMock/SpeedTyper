@@ -2,7 +2,7 @@
 #define KEYSTATES_H
 
 #include<SDL.h>
-#include <algorithm> //std::fill
+#include<algorithm> //std::fill
 #include<string>
 #include<sstream>
 

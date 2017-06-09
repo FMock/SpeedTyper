@@ -13,6 +13,7 @@ void GUI::loadImages(){
 	vertBorder = glTexImageTGAFile("images/vertBorder.tga", &width, &height);
 	horzBorder = glTexImageTGAFile("images/horzBorder.tga", &width, &height);
 	cloudBackground = glTexImageTGAFile("images/cloud_background.tga", &width, &height);
+	textTypeArea = glTexImageTGAFile("images/textTypeArea.tga", &width, &height);
 }
 
 void GUI::update(float deltaTime){
@@ -28,6 +29,7 @@ void GUI::draw(){
 	glDrawSprite(horzBorder,  0, 0, GD::WINDOW_WIDTH, GD::BORDER_WIDTH); // Upper
 	glDrawSprite(horzBorder,  0, 500, GD::BLOCK_AREA_WIDTH, GD::BORDER_WIDTH); // Block Floor
 	glDrawSprite(horzBorder,  0, 580, GD::WINDOW_WIDTH, GD::BORDER_WIDTH); // Lower
+	glDrawSprite(textTypeArea,  20, 520, GD::WINDOW_WIDTH - 40, 60); // text typing area background
 }
 
 std::string GUI::to_string() const{
