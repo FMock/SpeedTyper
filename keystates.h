@@ -13,7 +13,8 @@
 class KeyStates{
 public:
 	KeyStates();
-	int states[128]; // helps track key presses
+	static const int NUM_KEYS = 128;
+	int states[NUM_KEYS]; // helps track key presses
 	void zeroAllKeyStates();
 	void setKeyPressed(); // sets a key to 1 if pressed
 	std::string to_string() const;
