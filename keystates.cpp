@@ -19,37 +19,76 @@ void KeyStates::zeroAllKeyStates(){
 */
 void KeyStates::setKeyPressed(){
 
+	SDL_Keymod modstates = SDL_GetModState(); // to check for modifier keys like shift or ctrl
+
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
+
 		switch (event.type) {
 		case SDL_KEYUP:
 			switch(event.key.keysym.sym){
-			case SDLK_RETURN:
-				states[SDLK_RETURN] += 1;
-				break;
 			case SDLK_BACKSPACE:
 				states[SDLK_BACKSPACE] += 1;
 				break;
+			case SDLK_RETURN:
+				states[SDLK_RETURN] += 1;
+				break;
 			case SDLK_SPACE:
 				states[SDLK_SPACE] += 1;
+				break;
+			case SDLK_COMMA:
+				states[SDLK_COMMA] += 1;
+				break;
+			case SDLK_PERIOD:
+				states[SDLK_PERIOD] += 1;
+				break;
+			case SDLK_EQUALS:
+				if(modstates & KMOD_SHIFT)
+					states[SDLK_PLUS] += 1; // +
+				else
+					states[SDLK_EQUALS] += 1; // =
+				break;
+			case SDLK_MINUS:
+				states[SDLK_MINUS] += 1; // -
+				break;
+			case SDLK_DOLLAR:
+				states[SDLK_DOLLAR] += 1;
+				break;
+			case SDLK_SLASH:
+				if(modstates & KMOD_SHIFT)
+					states[SDLK_QUESTION] += 1; // ?
+				else
+					states[SDLK_SLASH] += 1; // /
 				break;
 			case SDLK_0:
 				states[SDLK_0] += 1;
 				break;
 			case SDLK_1:
-				states[SDLK_1] += 1;
+				if(modstates & KMOD_SHIFT)
+					states[SDLK_EXCLAIM] += 1; // !
+				else
+					states[SDLK_1] += 1; // 1
 				break;
 			case SDLK_2:
 				states[SDLK_2] += 1;
 				break;
 			case SDLK_3:
-				states[SDLK_3] += 1;
+				if(modstates & KMOD_SHIFT)
+					states[SDLK_HASH] += 1; // #
+				else
+					states[SDLK_3] += 1; // 3
 				break;
 			case SDLK_4:
-				states[SDLK_4] += 1;
+				if(modstates & KMOD_SHIFT)
+					states[SDLK_DOLLAR] += 1; // $
+				else
+					states[SDLK_4] += 1; // 4
 				break;
 			case SDLK_5:
-				states[SDLK_5] += 1;
+				if(modstates & KMOD_SHIFT)
+					states[SDLK_PERCENT] += 1; // %
+				else
+					states[SDLK_5] += 1; // 5
 				break;
 			case SDLK_6:
 				states[SDLK_6] += 1;
@@ -149,8 +188,12 @@ void KeyStates::setKeyPressed(){
 
 std::string KeyStates::to_string() const{
 	ostringstream oss;
-	oss << "*************************\n"
-		<< "P = " <<  states[19] << "\n";
+
+	for(int i = 0; i < NUM_KEYS; i++){
+		if(states[i] == 1){
+			oss <<  states[i] << "\n";
+		}
+	}
 	return oss.str();
 }
 

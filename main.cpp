@@ -45,7 +45,7 @@ const Uint8 *keyState;
 KeyStates keyStates;
 
 // Sprite Amount Constants
-const int NUM_BLOCKS = 20;
+const int NUM_BLOCKS = 24;
 
 // Containers
 std::vector<TextBlock *> blocks = std::vector<TextBlock *>();
@@ -154,7 +154,7 @@ int main(void)
 
 		// Register any keys pressed in tracking array
 		keyStates.setKeyPressed();
-
+		
 
 		// Loop through key states array and get key that was pressed
 		for(int i = 0; i < 128; i++){
@@ -180,16 +180,16 @@ int main(void)
 
 		// Take action if any of arrowkeys are pushed
 		if (kbState[SDL_SCANCODE_RIGHT]) {
-			//textBlock->moveRight();
+			//printf("Right arrow pressed\n");
 		}
 		else if (kbState[SDL_SCANCODE_LEFT]) {
-			//textBlock->moveLeft();
+			//printf("Left arrow pressed\n");
 		}
 		else if (kbState[SDL_SCANCODE_UP]) {
-			//textBlock->moveUp();
+			//printf("Up arrow pressed\n");
 		}
 		else if (kbState[SDL_SCANCODE_DOWN]) {
-			//textBlock->moveDown();
+			//printf("Down arrow pressed\n");
 		}else{
 			//textBlock->stop();
 		}
@@ -218,7 +218,10 @@ int main(void)
 
 		// update TextBlocks
 		for(int i = 0; i < blocks.size(); i++){
-			blocks.at(i)->update(deltaTime);
+			// if not flaged for removal, update
+			if(!blocks.at(i)->remove){
+				blocks.at(i)->update(deltaTime);
+			}
 
 			// If a block is moving, check for collisons
 			if(blocks.at(i)->moving && i > 0){
@@ -227,6 +230,10 @@ int main(void)
 					if(AABBIntersect(blocks.at(i)->getBox(), blocks.at(j)->getBox())){
 						blocks.at(i)->moving = false;
 					}
+				}
+
+				if(!blocks.at(i)->remove && blocks.at(i)->text.compare(testing) == 0){
+					blocks.at(i)->remove = true;
 				}
 			}
 		}
@@ -239,6 +246,13 @@ int main(void)
 
 		for(int i = 0; i < blocks.size(); i++){
 			blocks.at(i)->draw();
+		}
+
+		// Remove TextBlocks that have been flagged for removal
+		for(int i = 0; i < blocks.size(); i++){
+			if(blocks.at(i)->moving && blocks.at(i)->remove){
+				blocks.erase(blocks.begin() + i);
+			}
 		}
 
 		//*********** Troubleshooting *************************************************
