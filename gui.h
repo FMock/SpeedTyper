@@ -6,6 +6,7 @@
 #include"game_data.h"
 #include <sstream>
 #include<ctime>
+#include"cursor.h"
 
 // Author - Frank Mock
 // gui.h
@@ -21,6 +22,7 @@ public:
 	GLuint textTypeArea;
 	GLuint vertBorder;
 	GLuint horzBorder;
+
 	int width;
 	int height;
 

@@ -7,6 +7,7 @@
 #include<string>
 #include<sstream>
 #include<map>
+#include"cursor.h"
 
 class TextWriter{
 public:
@@ -15,10 +16,21 @@ public:
 	std::string text; // the text to be displayed
 	int fontWidth;
 	int fontHeight;
+	int cursorWidth;
+	int cursorHeight;
 	int xPosition;
 	int yPosition;
+	int yPositionCursor;
+	int offset;
 	void draw();
 	void update(std::string);
+
+	// Cursor related
+	Cursor *cursor;
+	std::vector<GLuint> cursorImages;
+	std::vector<AnimFrameData> cursorframeInfo;
+	AnimationData cursorAnimData; // cursor animation data
+
 	std::string to_string() const;
 };
 
