@@ -52,6 +52,7 @@ const int NUM_BLOCKS = 24;
 std::vector<TextBlock *> blocks = std::vector<TextBlock *>();
 std::vector<std::string> words = std::vector<std::string>();
 std::map<std::string, GLuint> stringToImageMap;
+
 int font_width = 30;
 int font_height = 30;
 
@@ -245,7 +246,6 @@ int main(void)
 	GLuint space = glTexImageTGAFile("images/space.tga", &font_width,&font_height);  // <blank space>
 	stringToImageMap[""] = space;
 
-
 	gui = new GUI();
 	keyStates = KeyStates();
 	gameData = Game_Data();
@@ -261,6 +261,7 @@ int main(void)
 		previousTime = currentTime;
 		currentTime = SDL_GetTicks();
 		deltaTime = (currentTime - previousTime) / 1000.0f;
+		gameData.deltaTime = deltaTime;
 
 		//*********** Get Player Input ***************************************
 

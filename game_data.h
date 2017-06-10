@@ -31,6 +31,7 @@ public:
 	static const int BLOCK_AREA_TO_RH_EDGE = 300;
 	static const int BL_FLOOR_TO_BOTTOM = 100;
 
+	float deltaTime;
 	int currentGameState;
 	int score;
 	int lives_remaining;
