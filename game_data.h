@@ -9,6 +9,7 @@
 
 using std::ostringstream;
 
+
 struct Game_Data{
 public:
 	inline Game_Data::Game_Data():currentGameState(0),
@@ -30,12 +31,23 @@ public:
 	static const int BLOCK_AREA_WIDTH = 500;
 	static const int BLOCK_AREA_TO_RH_EDGE = 300;
 	static const int BL_FLOOR_TO_BOTTOM = 100;
+	static const int BLOCK_FALL_AREA_MAX_X = 400;
+	static const int OPTION_BUTTON_MIN_X = 526;
+	static const int OPTION_BUTTON_MAX_X = 676;
+	static const int OPTION_BUTTON_MIN_Y = 225;
+	static const int OPTION_BUTTON_MAX_Y = 252;
+	static const int MAX_STRING_SIZE = 32;
+
 
 	float deltaTime;
 	int currentGameState;
 	int score;
 	int lives_remaining;
 	int level;
+
+	// GUI related
+	static bool options;
+	static inline void setOptions(bool b){ options = b; }
 
 	// Player Info
 	int player_x;

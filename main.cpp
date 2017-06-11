@@ -28,7 +28,7 @@
 
 typedef Game_Data GD;
 
-Game_Data gameData;
+Game_Data *gameData;
 
 // Set this to true to make the game loop exit.
 char shouldExit = 0;
@@ -43,7 +43,7 @@ const unsigned char* kbState = NULL;
 const Uint8 *keyState;
 
 // tracks key states
-KeyStates keyStates;
+KeyStates *keyStates;
 
 // Sprite Amount Constants
 const int NUM_BLOCKS = 24;
@@ -136,6 +136,7 @@ int main(void)
 		return 1;
 	}
 	readLines(inFile);
+	inFile.close();
 
 
 	/*Initialize the stringToImageMap
@@ -245,11 +246,13 @@ int main(void)
 	stringToImageMap["?"] = question;
 	GLuint space = glTexImageTGAFile("images/space.tga", &font_width,&font_height);  // <blank space>
 	stringToImageMap[""] = space;
+	GLuint period = glTexImageTGAFile("images/period.tga", &font_width,&font_height);  // .
+	stringToImageMap["."] = period;
 
-	gui = new GUI();
-	keyStates = KeyStates();
-	gameData = Game_Data();
+	gameData = new Game_Data();
+	keyStates = new KeyStates(*gameData);
 	textWriter = new TextWriter(testing, stringToImageMap);
+	gui = new GUI(*keyStates);
 	timer = Timer(SDL_GetTicks());
 
 	
@@ -261,7 +264,7 @@ int main(void)
 		previousTime = currentTime;
 		currentTime = SDL_GetTicks();
 		deltaTime = (currentTime - previousTime) / 1000.0f;
-		gameData.deltaTime = deltaTime;
+		gameData->deltaTime = deltaTime;
 
 		//*********** Get Player Input ***************************************
 
@@ -269,26 +272,28 @@ int main(void)
 		memcpy(kbPrevState, kbState, sizeof(kbPrevState));
 
 		// Register any keys pressed in tracking array
-		keyStates.setKeyPressed();
+		keyStates->setKeyPressed();
 		
 
 		// Loop through key states array and get key that was pressed
 		for(int i = 0; i < 128; i++){
-			if(keyStates.states[i] == 1){
+			if(keyStates->states[i] == 1){
 				std::string temp = SDL_GetKeyName(i);
 				//printf(temp.c_str());
 				if(temp.compare("Return") == 0){
 					testing = "";
 				}else if(temp.compare("Space") == 0){
-					testing.append(" ");
+					if(testing.size() < GD::MAX_STRING_SIZE)
+						testing.append(" ");
 				}else if(temp.compare("Backspace") == 0){
 					testing = testing.substr(0, testing.size()-1);
 				}else{
-					testing.append(SDL_GetKeyName(i));
+					if(testing.size() < GD::MAX_STRING_SIZE)
+						testing.append(SDL_GetKeyName(i));
 				}
 
-				printf(testing.c_str());
-				printf("\n");
+				//printf(testing.c_str());
+				//printf("\n");
 				
 			}
 		}
@@ -319,10 +324,12 @@ int main(void)
 		gui->update(deltaTime);
 		textWriter->update(testing);
 
+		int var = rand() % 1001 + 1; // just to add further variation in word choices
+
 		// Create a TextBlock every 4 seconds. blockInterval = 4
 		if(timer.count == blockInterval && blocks.size() < NUM_BLOCKS){
-			srand (SDL_GetTicks());
-			int xpos = rand() % GD::BLOCK_AREA_WIDTH + GD::BORDER_WIDTH;
+			srand (SDL_GetTicks() + var);
+			int xpos = rand() % GD::BLOCK_FALL_AREA_MAX_X + GD::BORDER_WIDTH;
 			int ypos = 0;
 			int i = rand() % wordCount; // used to get a random word for a block
 			blocks.push_back(new TextBlock(xpos, ypos, 30, 30, words.at(i), stringToImageMap));
@@ -376,14 +383,15 @@ int main(void)
 		//*********** Troubleshooting *************************************************
 
 		//printf(gem->to_string().c_str());
+		//printf(gui->to_string().c_str());
 		//printf(gameData.to_string().c_str());
-		//printf(keyStates.to_string().c_str());
+		//printf(keyStates->to_string().c_str());
 		//printf(timer.to_string().c_str());
 		//if(blocks.size() > 0)
 			//printf(blocks.at(0)->to_string().c_str());
 
 		// Clear all key states in key state tracking array
-		keyStates.zeroAllKeyStates();
+		keyStates->zeroAllKeyStates();
 		
 		// Present the most recent frame.
 		SDL_GL_SwapWindow(window);

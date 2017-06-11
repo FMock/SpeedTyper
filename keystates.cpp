@@ -4,14 +4,19 @@
 	Track Keyboard Presses
 */
 
+typedef Game_Data GD;
 using std::ostringstream;
 
-KeyStates::KeyStates(){
+KeyStates::KeyStates(Game_Data& gd){
 	std::fill_n(states, 128, 0);
+	optionButtonPressed = false;
+	optionButtonPressedCount = 0;
+	gameData = &gd;
 }
 
 void KeyStates::zeroAllKeyStates(){
 	std::fill_n(states, 128, 0);
+	optionButtonPressed = false;
 }
 
 /*
@@ -25,6 +30,26 @@ void KeyStates::setKeyPressed(){
 	while (SDL_PollEvent(&event)) {
 
 		switch (event.type) {
+
+		case SDL_MOUSEBUTTONDOWN:
+			if(event.button.button == SDL_BUTTON_LEFT){
+
+				// Determine where the player clicked
+				int xPos = event.button.x;
+				int yPos = event.button.y;
+				//printf("xPos = %d\n", xPos);
+				//printf("yPos = %d\n", yPos);
+
+				if(xPos > GD::OPTION_BUTTON_MIN_X && xPos < GD::OPTION_BUTTON_MAX_X && 
+					yPos > GD::OPTION_BUTTON_MIN_Y && yPos < GD::OPTION_BUTTON_MAX_Y){
+					optionButtonPressed = true;
+					optionButtonPressedCount += 1; // odd numbers correspond to open and even to close
+
+					// Update options variable in GameData < TO DO >
+				}
+			}
+			break;
+			
 		case SDL_KEYUP:
 			switch(event.key.keysym.sym){
 			case SDLK_BACKSPACE:
@@ -186,6 +211,11 @@ void KeyStates::setKeyPressed(){
 	}
 }
 
+
+bool KeyStates::getOptionButtonPressed(){
+	return optionButtonPressed;
+}
+
 std::string KeyStates::to_string() const{
 	ostringstream oss;
 
@@ -194,6 +224,8 @@ std::string KeyStates::to_string() const{
 			oss <<  states[i] << "\n";
 		}
 	}
+
+	oss << "optionButtonPressed = " << optionButtonPressed << "\n";
 	return oss.str();
 }
 
