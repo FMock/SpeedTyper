@@ -7,6 +7,7 @@
 #include <sstream>
 #include<ctime>
 #include"cursor.h"
+#include"keystates.h"
 
 // Author - Frank Mock
 // gui.h
@@ -14,17 +15,26 @@
 
 class GUI{
 public:
-	GUI();
+	GUI(KeyStates&);
 
 	void loadImages();
+	KeyStates *keyStates;
 	GLuint logo;
 	GLuint cloudBackground;
 	GLuint textTypeArea;
 	GLuint vertBorder;
 	GLuint horzBorder;
+	GLuint optionsClosed;
+	GLuint optionsOpen;
+	GLuint helpClosed;
+	GLuint aboutClosed;
 
 	int width;
 	int height;
+
+	bool options;
+	void setOptions(bool);
+	bool getOptions() const;
 
 	void update(float deltaTime);
 
