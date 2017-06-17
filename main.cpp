@@ -94,8 +94,17 @@ float currentPausePressTime = 0.0f;
 static const int Y_POSITION_THRESHOLD = 90;
 static int yPosReached = GD::WINDOW_HEIGHT - GD::BL_FLOOR_TO_BOTTOM;
 
+// For sound functionality
+FMOD::System *fmod_sys;
+FMOD::Sound *scoreSound;
+
 int main(void)
 {
+	// Sound Setup
+	FMOD_RESULT fmodResult = System_Create(&fmod_sys);
+	fmod_sys->init(100, FMOD_INIT_NORMAL, 0);
+	fmod_sys->createSound("sounds/score_sound.wav", FMOD_DEFAULT, 0, &scoreSound);
+
 	// Initialize SDL.
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "Could not initialize SDL. ErrorCode=%s\n", SDL_GetError());
@@ -380,6 +389,8 @@ int main(void)
 		}
 
 		// ************* Do Updates  **************************************************
+		fmod_sys->update(); // If you don't update the sound will play once
+
 		gui->update(deltaTime);
 
 		if(!paused){
@@ -421,8 +432,10 @@ int main(void)
 						}
 					}
 
+					// check if player typed the correct string
 					if(!blocks.at(i).remove && blocks.at(i).text.compare(testing) == 0){
 						blocks.at(i).remove = true;
+						fmod_sys->playSound(scoreSound, 0, false, NULL);
 					}
 				}
 			}
