@@ -65,6 +65,7 @@ int overlayHeight = 200;
 GLuint gameOverOverlay;
 GLuint playing;
 GLuint pausedImg;
+GLuint startImg;
 
 // To regulate frame rate
 int previousTime = 0;
@@ -84,6 +85,7 @@ void readWords(std::ifstream &in);
 void readLines(std::ifstream &in);
 bool AABBIntersect(AABB box1, AABB box2);
 
+bool start = true;
 bool gameOver = false;
 bool paused = true;
 float previousPausePressTime = 0.0f;
@@ -156,6 +158,7 @@ int main(void)
 	gameOverOverlay = glTexImageTGAFile("images/endGame.tga", &overlayWidth, &overlayHeight);
 	playing = glTexImageTGAFile("images/playing.tga", &overlayWidth, &overlayHeight);
 	pausedImg = glTexImageTGAFile("images/paused.tga", &overlayWidth, &overlayHeight);
+	startImg = glTexImageTGAFile("images/startImg.tga", &overlayWidth, &overlayHeight);
 
 
 	/*Initialize the stringToImageMap
@@ -338,9 +341,12 @@ int main(void)
 
 			gameOver = false;
 			paused = false;
+			start = false;
 		}
 		else if (kbState[SDL_SCANCODE_LEFT]) {
 			//printf("Left arrow pressed\n");
+
+			start = false;
 
 			//******** PAUSE THE GAME ***************************
 
@@ -446,7 +452,11 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT); // Be sure to always draw objects after this
 
 		if(paused){
-			glDrawSprite(pausedImg, 520, 340, overlayWidth, overlayHeight);
+			if(start){
+				glDrawSprite(startImg, 520, 340, overlayWidth, overlayHeight);
+			}else{
+				glDrawSprite(pausedImg, 520, 340, overlayWidth, overlayHeight);
+			}
 		}
 		else if(gameOver){
 			glDrawSprite(gameOverOverlay, 520, 340, overlayWidth, overlayHeight);

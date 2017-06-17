@@ -37,8 +37,8 @@ void KeyStates::setKeyPressed(){
 				// Determine where the player clicked
 				int xPos = event.button.x;
 				int yPos = event.button.y;
-				//printf("xPos = %d\n", xPos);
-				//printf("yPos = %d\n", yPos);
+				printf("xPos = %d\n", xPos);
+				printf("yPos = %d\n", yPos);
 
 				if(xPos > GD::OPTION_BUTTON_MIN_X && xPos < GD::OPTION_BUTTON_MAX_X && 
 					yPos > GD::OPTION_BUTTON_MIN_Y && yPos < GD::OPTION_BUTTON_MAX_Y){
