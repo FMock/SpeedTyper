@@ -49,7 +49,8 @@ KeyStates *keyStates;
 const int NUM_BLOCKS = 24;
 
 // Containers
-std::vector<TextBlock *> blocks = std::vector<TextBlock *>();
+//std::vector<TextBlock *> blocks = std::vector<TextBlock *>();
+std::vector<TextBlock> blocks = std::vector<TextBlock>();
 std::vector<std::string> words = std::vector<std::string>();
 std::map<std::string, GLuint> stringToImageMap;
 
@@ -59,6 +60,11 @@ int font_height = 30;
 // Objects
 GUI *gui;
 TextWriter *textWriter;
+int overlayWidth = 500;
+int overlayHeight = 200;
+GLuint gameOverOverlay;
+GLuint playing;
+GLuint pausedImg;
 
 // To regulate frame rate
 int previousTime = 0;
@@ -77,6 +83,14 @@ int blockInterval = 4; // Interval in seconds at which a new block appears
 void readWords(std::ifstream &in);
 void readLines(std::ifstream &in);
 bool AABBIntersect(AABB box1, AABB box2);
+
+bool gameOver = false;
+bool paused = true;
+float previousPausePressTime = 0.0f;
+float currentPausePressTime = 0.0f;
+
+static const int Y_POSITION_THRESHOLD = 90;
+static int yPosReached = GD::WINDOW_HEIGHT - GD::BL_FLOOR_TO_BOTTOM;
 
 int main(void)
 {
@@ -137,6 +151,11 @@ int main(void)
 	}
 	readLines(inFile);
 	inFile.close();
+
+	// **********  LOAD IMAGE RESOURCES ***************************************************
+	gameOverOverlay = glTexImageTGAFile("images/endGame.tga", &overlayWidth, &overlayHeight);
+	playing = glTexImageTGAFile("images/playing.tga", &overlayWidth, &overlayHeight);
+	pausedImg = glTexImageTGAFile("images/paused.tga", &overlayWidth, &overlayHeight);
 
 
 	/*Initialize the stringToImageMap
@@ -255,7 +274,8 @@ int main(void)
 	gui = new GUI(*keyStates);
 	timer = Timer(SDL_GetTicks());
 
-	
+	blocks.reserve(24); // Try to prevent blocks vector resize overhead
+
 	//********** GAME LOOP *************************************************************
 	kbState = SDL_GetKeyboardState(NULL);
 	while (!shouldExit) {
@@ -302,16 +322,49 @@ int main(void)
 		// Take action if any of arrowkeys are pushed
 		if (kbState[SDL_SCANCODE_RIGHT]) {
 			//printf("Right arrow pressed\n");
+
+			//******* RESET THE GAME ****************************
+			// Flag blocks for removal
+			for(int i = 0; i < blocks.size(); i++){
+				blocks.at(i).remove = true;
+			}
+
+			// Remove TextBlocks that have been flagged for removal
+			for(int i = 0; i < blocks.size(); i++){
+				if(blocks.at(i).remove){
+					blocks.erase(blocks.begin() + i);
+				}
+			}
+
+			gameOver = false;
+			paused = false;
 		}
 		else if (kbState[SDL_SCANCODE_LEFT]) {
 			//printf("Left arrow pressed\n");
+
+			//******** PAUSE THE GAME ***************************
+
+			// Determine how long it's been since left arrow was last pressed
+			previousPausePressTime = currentPausePressTime;
+			currentPausePressTime = SDL_GetTicks();
+			float sinceLastPressed = (currentPausePressTime - previousPausePressTime) / 1000.0f;
+
+			if(sinceLastPressed > 0.01){
+				if(paused)
+					paused = false;
+				else
+					paused = true;
+			}
 		}
 		else if (kbState[SDL_SCANCODE_UP]) {
 			//printf("Up arrow pressed\n");
 		}
 		else if (kbState[SDL_SCANCODE_DOWN]) {
 			//printf("Down arrow pressed\n");
-		}else{
+		}else if(kbState[SDL_SCANCODE_F1]){
+			//printf("F1 pressed\n");
+		}
+		else{
 			//textBlock->stop();
 		}
 
@@ -322,66 +375,105 @@ int main(void)
 
 		// ************* Do Updates  **************************************************
 		gui->update(deltaTime);
-		textWriter->update(testing);
 
-		int var = rand() % 1001 + 1; // just to add further variation in word choices
+		if(!paused){
+			textWriter->update(testing);
 
-		// Create a TextBlock every 4 seconds. blockInterval = 4
-		if(timer.count == blockInterval && blocks.size() < NUM_BLOCKS){
-			srand (SDL_GetTicks() + var);
-			int xpos = rand() % GD::BLOCK_FALL_AREA_MAX_X + GD::BORDER_WIDTH;
-			int ypos = 0;
-			int i = rand() % wordCount; // used to get a random word for a block
-			blocks.push_back(new TextBlock(xpos, ypos, 30, 30, words.at(i), stringToImageMap));
-		}
+			int var = rand() % 1001 + 1; // just to add further variation in word choices
 
-		if(timer.count == blockInterval)
-			timer.reSet();
-
-		timer.update();
-
-		// update TextBlocks
-		for(int i = 0; i < blocks.size(); i++){
-			// if not flaged for removal, update
-			if(!blocks.at(i)->remove){
-				blocks.at(i)->update(deltaTime);
+			// Create a TextBlock every 4 seconds. blockInterval = 4
+			if(timer.count == blockInterval && blocks.size() < NUM_BLOCKS && !gameOver){
+				srand (SDL_GetTicks() + var);
+				int xpos = rand() % GD::BLOCK_FALL_AREA_MAX_X + GD::BORDER_WIDTH;
+				int ypos = 0;
+				int i = rand() % wordCount; // used to get a random word for a block
+				blocks.push_back(TextBlock(xpos, ypos, 30, 30, words.at(i), stringToImageMap));
 			}
 
-			// If a block is moving, check for collisons
-			if(blocks.at(i)->moving && i > 0){
-				// Check for collisons with blocks in lower index
-				for(int j =  i - 1; j >= 0; j--){
-					if(AABBIntersect(blocks.at(i)->getBox(), blocks.at(j)->getBox())){
-						blocks.at(i)->moving = false;
+			if(timer.count == blockInterval)
+				timer.reSet();
+
+			timer.update();
+
+			// update TextBlocks
+			for(int i = 0; i < blocks.size(); i++){
+
+				// if not flaged for removal, update
+				if(!blocks.at(i).remove){
+					blocks.at(i).update(deltaTime);
+				}
+
+				// If a block is moving, check for collisons
+				if(blocks.at(i).moving){
+
+					// Check for collisons with blocks in lower index
+					if(i > 0){
+						for(int j =  i - 1; j >= 0; j--){
+							if(AABBIntersect(blocks.at(i).getBox(), blocks.at(j).getBox())){
+								blocks.at(i).moving = false;
+							}
+						}
+					}
+
+					if(!blocks.at(i).remove && blocks.at(i).text.compare(testing) == 0){
+						blocks.at(i).remove = true;
 					}
 				}
-
-				if(!blocks.at(i)->remove && blocks.at(i)->text.compare(testing) == 0){
-					blocks.at(i)->remove = true;
-				}
 			}
-		}
+
+
+			// Get the Y position of the highest stacked block
+			int lowestYPosition = GD::WINDOW_HEIGHT;
+			for(int i = 0; i < blocks.size(); i++){
+				if(!blocks.at(i).moving && blocks.at(i).getYPos() < lowestYPosition)
+					lowestYPosition = blocks.at(i).getYPos();
+			}
+
+			yPosReached = lowestYPosition;
+			// GAME OVER CONDITION - Heighest stacked block at or above threshold
+			if(!gameOver &&  yPosReached <= Y_POSITION_THRESHOLD){
+				gameOver = true;
+			}
+
+			// GAME OVER CONDITION - Amount of TextBlocks displayed == NUM_BLOCKS
+			if(blocks.size() == NUM_BLOCKS && !gameOver && !blocks.at(NUM_BLOCKS - 1).moving){
+				gameOver = true;
+			}
+		}// END !PAUSED
 		
 		//*********** Drawing **********************************************************
 		glClearColor(0, 0, 0, 1);  
 		glClear(GL_COLOR_BUFFER_BIT); // Be sure to always draw objects after this
 
+		if(paused){
+			glDrawSprite(pausedImg, 520, 340, overlayWidth, overlayHeight);
+		}
+		else if(gameOver){
+			glDrawSprite(gameOverOverlay, 520, 340, overlayWidth, overlayHeight);
+		}else{
+			glDrawSprite(playing, 520, 340, overlayWidth, overlayHeight);
+		}
+
 		gui->draw();
+
 		textWriter->draw();
 
 		for(int i = 0; i < blocks.size(); i++){
-			blocks.at(i)->draw();
+			blocks.at(i).draw();
 		}
+
 
 		// Remove TextBlocks that have been flagged for removal
 		for(int i = 0; i < blocks.size(); i++){
-			if(blocks.at(i)->moving && blocks.at(i)->remove){
+			if(blocks.at(i).moving && blocks.at(i).remove){
 				blocks.erase(blocks.begin() + i);
 			}
 		}
 
-		//*********** Troubleshooting *************************************************
 
+		//*********** Troubleshooting *************************************************
+		//printf("resetGame = %i\n", resetGame);
+		//printf("yPosReached = %i\n", yPosReached);
 		//printf(gem->to_string().c_str());
 		//printf(gui->to_string().c_str());
 		//printf(gameData.to_string().c_str());
