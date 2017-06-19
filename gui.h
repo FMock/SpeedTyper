@@ -8,6 +8,7 @@
 #include<ctime>
 #include"cursor.h"
 #include"keystates.h"
+#include"selection.h"
 
 // Author - Frank Mock
 // gui.h
@@ -15,10 +16,12 @@
 
 class GUI{
 public:
-	GUI(KeyStates&);
+	GUI(KeyStates&, Game_Data&);
 
 	void loadImages();
 	KeyStates *keyStates;
+	Game_Data *gameData;
+	std::vector<Selection> selectionItems;
 	GLuint logo;
 	GLuint cloudBackground;
 	GLuint textTypeArea;
@@ -29,12 +32,16 @@ public:
 	GLuint helpClosed;
 	GLuint aboutClosed;
 
+	std::string menuItemSelected;
+	int selectedIndex;
+
 	int width;
 	int height;
 
 	bool options;
 	void setOptions(bool);
 	bool getOptions() const;
+	void buildSelections();
 
 	void update(float deltaTime);
 

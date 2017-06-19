@@ -19,7 +19,12 @@ public:
 	int states[NUM_KEYS]; // helps track key presses
 	void zeroAllKeyStates();
 	void setKeyPressed(); // sets a key to 1 if pressed
+	bool mouseClicked;
+	int mouseClickedCount;
+	int mouseX;
+	int mouseY;
 	bool optionButtonPressed;
+	bool optionsDisplayed;
 	bool getOptionButtonPressed();
 	int optionButtonPressedCount;
 	std::string to_string() const;

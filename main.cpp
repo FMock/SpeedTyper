@@ -98,6 +98,16 @@ static int yPosReached = GD::WINDOW_HEIGHT - GD::BL_FLOOR_TO_BOTTOM;
 FMOD::System *fmod_sys;
 FMOD::Sound *scoreSound;
 
+// category start numbers
+int defaultNum = 0;
+int animals;
+int places;
+int things;
+int transportation;
+int music;
+int anime;
+
+
 int main(void)
 {
 	// Sound Setup
@@ -283,7 +293,7 @@ int main(void)
 	gameData = new Game_Data();
 	keyStates = new KeyStates(*gameData);
 	textWriter = new TextWriter(testing, stringToImageMap);
-	gui = new GUI(*keyStates);
+	gui = new GUI(*keyStates, *gameData);
 	timer = Timer(SDL_GetTicks());
 
 	blocks.reserve(24); // Try to prevent blocks vector resize overhead
@@ -403,7 +413,33 @@ int main(void)
 				srand (SDL_GetTicks() + var);
 				int xpos = rand() % GD::BLOCK_FALL_AREA_MAX_X + GD::BORDER_WIDTH;
 				int ypos = 0;
-				int i = rand() % wordCount; // used to get a random word for a block
+				int i;
+				int numWords; // number words in category
+				std::string category = gameData->menuItemSelected;
+
+				if(category.compare("animals") == 0){
+					numWords = places - animals;
+					i = rand() % numWords + animals; // animals category
+				}else if(category.compare("places") == 0){
+					numWords = things - places;
+					i = rand() % numWords + places; // places category
+				}else if(category.compare("things") == 0){
+					numWords = transportation - things;
+					i = rand() % numWords + things; // things category
+				}else if(category.compare("transportation") == 0){
+					numWords = music - transportation;
+					i = rand() % numWords + transportation; // transportation category
+				}else if(category.compare("music") == 0){
+					numWords = anime - music;
+					i = rand() % numWords + music; // music category
+				}else if(category.compare("anime") == 0){
+					numWords = wordCount - anime;
+					i = rand() % numWords + anime; // anime category
+				}
+				else{
+					i = rand() % wordCount; // default category == all the words
+				}
+
 				blocks.push_back(TextBlock(xpos, ypos, 30, 30, words.at(i), stringToImageMap));
 			}
 
@@ -495,11 +531,13 @@ int main(void)
 
 
 		//*********** Troubleshooting *************************************************
+		//printf("animals = %i, places = %i, things = %i, transportation = %i, music = %i, anime = %i\n", 
+			//animals, places, things, transportation, music, anime);
 		//printf("resetGame = %i\n", resetGame);
 		//printf("yPosReached = %i\n", yPosReached);
 		//printf(gem->to_string().c_str());
 		//printf(gui->to_string().c_str());
-		//printf(gameData.to_string().c_str());
+		//printf(gameData->to_string().c_str());
 		//printf(keyStates->to_string().c_str());
 		//printf(timer.to_string().c_str());
 		//if(blocks.size() > 0)
@@ -558,6 +596,20 @@ void readWords(std::ifstream &in){
 void readLines(std::ifstream &in){
 	std::string line;
 	while (std::getline(in, line)){
+		if(line.compare("#ANIMALS") == 0){
+			animals = wordCount;
+		}else if(line.compare("#PLACES") == 0){
+			places = wordCount;
+		}else if(line.compare("#THINGS") == 0){
+			things = wordCount;
+		}else if(line.compare("#TRANSPORTATION") == 0){
+			transportation = wordCount;
+		}else if(line.compare("#MUSIC") == 0){
+			music = wordCount;
+		}else if(line.compare("#ANIME") == 0){
+			anime = wordCount;
+		}else{}
+
 		words.push_back(line);
 		wordCount ++;
 	}
