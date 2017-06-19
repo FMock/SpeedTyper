@@ -1,22 +1,31 @@
 #include"keystates.h"
 
 /*
-	Track Keyboard Presses
+	Track Keyboard Presses and Mouse Position
 */
 
 typedef Game_Data GD;
 using std::ostringstream;
 
-KeyStates::KeyStates(Game_Data& gd){
+KeyStates::KeyStates(Game_Data& gd):gameData(&gd),
+									optionButtonPressed(false),
+									optionButtonPressedCount(0),
+									optionsDisplayed(false),
+									mouseClicked(false),
+									mouseClickedCount(0),
+									mouseX(0),
+									mouseY(0)
+{
 	std::fill_n(states, 128, 0);
-	optionButtonPressed = false;
-	optionButtonPressedCount = 0;
-	gameData = &gd;
+	gameData->optionsDisplayed = this->optionsDisplayed;
 }
 
+// Resets key and mouse states to default initial default state
 void KeyStates::zeroAllKeyStates(){
 	std::fill_n(states, 128, 0);
 	optionButtonPressed = false;
+	mouseClicked = false;
+	gameData->mouseClicked = false;
 }
 
 /*
@@ -34,18 +43,27 @@ void KeyStates::setKeyPressed(){
 		case SDL_MOUSEBUTTONDOWN:
 			if(event.button.button == SDL_BUTTON_LEFT){
 
-				// Determine where the player clicked
-				int xPos = event.button.x;
-				int yPos = event.button.y;
-				printf("xPos = %d\n", xPos);
-				printf("yPos = %d\n", yPos);
+				// Mouse was clicked
+				mouseClicked = true;
+				mouseClickedCount += 1;
+				gameData->mouseClicked = true;
 
-				if(xPos > GD::OPTION_BUTTON_MIN_X && xPos < GD::OPTION_BUTTON_MAX_X && 
-					yPos > GD::OPTION_BUTTON_MIN_Y && yPos < GD::OPTION_BUTTON_MAX_Y){
+				// Determine where the player clicked
+				mouseX = event.button.x;
+				mouseY = event.button.y;
+				gameData->mouseX = mouseX;
+				gameData->mouseY = mouseY;
+				//printf("xPos = %d\n", xPos);
+				//printf("yPos = %d\n", yPos);
+
+				if(mouseX > GD::OPTION_BUTTON_MIN_X && mouseX < GD::OPTION_BUTTON_MAX_X && 
+					mouseY > GD::OPTION_BUTTON_MIN_Y && mouseY < GD::OPTION_BUTTON_MAX_Y){
 					optionButtonPressed = true;
 					optionButtonPressedCount += 1; // odd numbers correspond to open and even to close
 
-					// Update options variable in GameData < TO DO >
+					optionButtonPressedCount % 2 == 0 ? optionsDisplayed = false : optionsDisplayed = true;
+
+					gameData->optionsDisplayed = this->optionsDisplayed;
 				}
 			}
 			break;
@@ -225,7 +243,14 @@ std::string KeyStates::to_string() const{
 		}
 	}
 
-	oss << "optionButtonPressed = " << optionButtonPressed << "\n";
+	oss << "*************************\n"
+		<< "optionButtonPressed = " << optionButtonPressed << "\n"
+		<< "optionButtonPressedCount = " << optionButtonPressedCount << "\n"
+		<< "optionsDisplayed = " << optionsDisplayed << "\n"
+		<< "mouseClicked = " << mouseClicked << "\n"
+		<< "mouseClickedCount = " << mouseClickedCount << "\n"
+		<< "mouseX = " << mouseX << "\n"
+		<< "mouseY = " << mouseY << "\n";
 	return oss.str();
 }
 

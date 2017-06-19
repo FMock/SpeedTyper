@@ -13,12 +13,15 @@ using std::ostringstream;
 struct Game_Data{
 public:
 	inline Game_Data::Game_Data():currentGameState(0),
-								  player_x(0), 
-								  player_y(0),
+								 // player_x(0), /****** NOT USED FOR THIS TYPE OF GAME *****
+								 // player_y(0), /****** NOT USED FOR THIS TYPE OF GAME *****
 								  score(0),
 								  level(0),
-								  player_direction(0),
-								  lives_remaining(0){}
+								 // player_direction(0),  /****** NOT USED FOR THIS TYPE OF GAME *****
+								  lives_remaining(0),
+								  mouseClicked(false),
+								  mouseX(0),
+								  mouseY(0){}
 
 	enum state {START, PLAY, PAUSE, END};
 
@@ -45,10 +48,16 @@ public:
 	int lives_remaining;
 	int level;
 
-	// GUI related
-	static bool options;
-	static inline void setOptions(bool b){ options = b; }
+	// Mouse Data
+	bool mouseClicked;
+	int mouseX;
+	int mouseY;
 
+	// GUI related
+	bool optionsDisplayed;
+	std::string menuItemSelected;
+
+	/****** NOT USED FOR THIS GAME TYPE
 	// Player Info
 	int player_x;
 	int player_y;
@@ -60,6 +69,7 @@ public:
 
 	inline int getPlayerXPos(){ return player_x; }
 	inline int getPlayerYPos(){ return player_y; }
+	*/
 
 	inline std::string Game_Data::to_string() const{
 	ostringstream oss;
@@ -67,10 +77,15 @@ public:
 		<< "score = " << score << "\n"
 		<< "level = " << level << "\n"
 		<< "lives remaining = " << lives_remaining << "\n"
-		<< "Player's X pos. = " <<  player_x << "\n"
-		<< "Player's Y pos. = " <<  player_y << "\n"
-		<< "currentGameState = " << currentGameState << "\n"
-		<< "Player's Direction = " <<  player_direction << "\n";
+		//<< "Player's X pos. = " <<  player_x << "\n"   /****** NOT USED FOR THIS TYPE OF GAME *****
+		//<< "Player's Y pos. = " <<  player_y << "\n"   /****** NOT USED FOR THIS TYPE OF GAME *****
+		<< "optionsDisplayed = " << optionsDisplayed << "\n"
+		<< "menuItemSelected = " << menuItemSelected << "\n"
+		<< "mouseClicked = " << mouseClicked << "\n"
+		<< "mouseX = " << mouseX << "\n"
+		<< "mouseY = " << mouseY << "\n"
+		<< "currentGameState = " << currentGameState << "\n";
+		//<< "Player's Direction = " <<  player_direction << "\n";  /****** NOT USED FOR THIS TYPE OF GAME *****
 		return oss.str();
 	}
 };
