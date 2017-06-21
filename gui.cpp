@@ -71,7 +71,7 @@ void GUI::update(float deltaTime){
 }
 	
 void GUI::draw(){
-	glDrawSprite(logo, 520, 20, 260, 100);
+	glDrawSprite(logo, 520, 20, 260, 55); // logo is 260 Wide X 55 High
 
 	// Options Menu
 	if(keyStates->optionButtonPressedCount % 2 == 0){

@@ -17,6 +17,7 @@
 #include<fstream>
 #include"gui.h"
 #include"TextWriter.h"
+#include"stats.h"
 
 /*
 	main.cpp
@@ -59,6 +60,7 @@ int font_height = 30;
 
 // Objects
 GUI *gui;
+Stats stats;
 TextWriter *textWriter;
 int overlayWidth = 500;
 int overlayHeight = 200;
@@ -290,6 +292,7 @@ int main(void)
 	GLuint period = glTexImageTGAFile("images/period.tga", &font_width,&font_height);  // .
 	stringToImageMap["."] = period;
 
+	stats = Stats();
 	gameData = new Game_Data();
 	keyStates = new KeyStates(*gameData);
 	textWriter = new TextWriter(testing, stringToImageMap);
@@ -358,6 +361,7 @@ int main(void)
 				}
 			}
 
+			stats.reset();
 			gameOver = false;
 			paused = false;
 			start = false;
@@ -441,6 +445,7 @@ int main(void)
 				}
 
 				blocks.push_back(TextBlock(xpos, ypos, 30, 30, words.at(i), stringToImageMap));
+				stats.increaseTotalCount(1); // Keep track of the amount of words presented to player
 			}
 
 			if(timer.count == blockInterval)
@@ -525,12 +530,17 @@ int main(void)
 		// Remove TextBlocks that have been flagged for removal
 		for(int i = 0; i < blocks.size(); i++){
 			if(blocks.at(i).moving && blocks.at(i).remove){
+				std::string text = blocks.at(i).text;
+				int charCount = text.length();
+				stats.increaseScore(charCount);
+				stats.increaseCorrectCount(1);
 				blocks.erase(blocks.begin() + i);
 			}
 		}
 
 
 		//*********** Troubleshooting *************************************************
+		printf(stats.to_string().c_str());
 		//printf("animals = %i, places = %i, things = %i, transportation = %i, music = %i, anime = %i\n", 
 			//animals, places, things, transportation, music, anime);
 		//printf("resetGame = %i\n", resetGame);
