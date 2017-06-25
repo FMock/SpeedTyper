@@ -16,6 +16,10 @@ public:
 								 // player_x(0), /****** NOT USED FOR THIS TYPE OF GAME *****
 								 // player_y(0), /****** NOT USED FOR THIS TYPE OF GAME *****
 								  score(0),
+								  highScore(0),
+								  totalCount(0),
+								  correctCount(0),
+								  currentWord(""),
 								  level(0),
 								 // player_direction(0),  /****** NOT USED FOR THIS TYPE OF GAME *****
 								  lives_remaining(0),
@@ -39,14 +43,23 @@ public:
 	static const int OPTION_BUTTON_MAX_X = 676;
 	static const int OPTION_BUTTON_MIN_Y = 225;
 	static const int OPTION_BUTTON_MAX_Y = 252;
+
+	static const int ABOUT_BUTTON_MIN_X = 529;
+	static const int ABOUT_BUTTON_MAX_X = 623;
+	static const int ABOUT_BUTTON_MIN_Y = 311;
+	static const int ABOUT_BUTTON_MAX_Y = 330;
 	static const int MAX_STRING_SIZE = 32;
 
 
 	float deltaTime;
 	int currentGameState;
 	int score;
+	int highScore;
 	int lives_remaining;
 	int level;
+	int totalCount;
+	int correctCount;
+	std::string currentWord;
 
 	// Mouse Data
 	bool mouseClicked;
@@ -55,6 +68,7 @@ public:
 
 	// GUI related
 	bool optionsDisplayed;
+	bool aboutDisplayed;
 	std::string menuItemSelected;
 
 	/****** NOT USED FOR THIS GAME TYPE
@@ -74,12 +88,17 @@ public:
 	inline std::string Game_Data::to_string() const{
 	ostringstream oss;
 	oss << "*************************\n"
+		<< "currentWord = " << currentWord << "\n"
 		<< "score = " << score << "\n"
+		<< "highScore = " << highScore << "\n"
+		<< "totalCount = " << totalCount << "\n"
+		<< "correctCount = " << correctCount << "\n"
 		<< "level = " << level << "\n"
 		<< "lives remaining = " << lives_remaining << "\n"
 		//<< "Player's X pos. = " <<  player_x << "\n"   /****** NOT USED FOR THIS TYPE OF GAME *****
 		//<< "Player's Y pos. = " <<  player_y << "\n"   /****** NOT USED FOR THIS TYPE OF GAME *****
 		<< "optionsDisplayed = " << optionsDisplayed << "\n"
+		<< "aboutDisplayed = " << aboutDisplayed << "\n"
 		<< "menuItemSelected = " << menuItemSelected << "\n"
 		<< "mouseClicked = " << mouseClicked << "\n"
 		<< "mouseX = " << mouseX << "\n"

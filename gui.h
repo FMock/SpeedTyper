@@ -10,6 +10,7 @@
 #include"keystates.h"
 #include"selection.h"
 
+
 // Author - Frank Mock
 // gui.h
 // The graphic display of the game 
@@ -31,6 +32,7 @@ public:
 	GLuint optionsOpen;
 	GLuint helpClosed;
 	GLuint aboutClosed;
+	GLuint aboutOpen;
 
 	std::string menuItemSelected;
 	int selectedIndex;

@@ -37,6 +37,7 @@ void GUI::loadImages(){
 	optionsOpen = glTexImageTGAFile("images/options_open.tga", &width, &height);
 	helpClosed = glTexImageTGAFile("images/help.tga", &width, &height);
 	aboutClosed = glTexImageTGAFile("images/about.tga", &width, &height);
+	aboutOpen = glTexImageTGAFile("images/about_open.tga", &width, &height);
 }
 
 void GUI::update(float deltaTime){
@@ -74,12 +75,18 @@ void GUI::draw(){
 	glDrawSprite(logo, 520, 20, 260, 55); // logo is 260 Wide X 55 High
 
 	// Options Menu
-	if(keyStates->optionButtonPressedCount % 2 == 0){
+	if(keyStates->optionButtonPressedCount % 2 == 0){ // options closed
+		if(keyStates->aboutButtonPressedCount % 2 != 0){
+			glDrawSprite(aboutOpen, 520, 300, 260, 250);
+		}else{
+			// About menu
+			glDrawSprite(aboutClosed, 520, 300, 260, 40);
+		}
+
 		glDrawSprite(optionsClosed, 520, 220, 260, 40);
 		// Help menu
 		glDrawSprite(helpClosed, 520, 260, 260, 40);
-		// About menu
-		glDrawSprite(aboutClosed, 520, 300, 260, 40);
+
 	}else{
 		glDrawSprite(optionsOpen, 520, 220, 260, 300);
 	}
