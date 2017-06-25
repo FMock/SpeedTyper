@@ -25,11 +25,14 @@ public:
 	int mouseY;
 	bool optionButtonPressed;
 	bool aboutButtonPressed;
+	bool helpButtonPressed;
 	bool optionsDisplayed;
 	bool aboutDisplayed;
+	bool helpDisplayed;
 	bool getOptionButtonPressed();
 	int optionButtonPressedCount;
 	int aboutButtonPressedCount;
+	int helpButtonPressedCount;
 	std::string to_string() const;
 };
 

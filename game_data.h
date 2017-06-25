@@ -20,6 +20,9 @@ public:
 								  totalCount(0),
 								  correctCount(0),
 								  currentWord(""),
+								  optionsDisplayed(false),
+								  aboutDisplayed(false),
+								  helpDisplayed(false),
 								  level(0),
 								 // player_direction(0),  /****** NOT USED FOR THIS TYPE OF GAME *****
 								  lives_remaining(0),
@@ -39,6 +42,8 @@ public:
 	static const int BLOCK_AREA_TO_RH_EDGE = 300;
 	static const int BL_FLOOR_TO_BOTTOM = 100;
 	static const int BLOCK_FALL_AREA_MAX_X = 400;
+
+	// Button Range points
 	static const int OPTION_BUTTON_MIN_X = 526;
 	static const int OPTION_BUTTON_MAX_X = 676;
 	static const int OPTION_BUTTON_MIN_Y = 225;
@@ -48,6 +53,12 @@ public:
 	static const int ABOUT_BUTTON_MAX_X = 623;
 	static const int ABOUT_BUTTON_MIN_Y = 311;
 	static const int ABOUT_BUTTON_MAX_Y = 330;
+
+	static const int HELP_BUTTON_MIN_X = 529;
+	static const int HELP_BUTTON_MAX_X = 614;
+	static const int HELP_BUTTON_MIN_Y = 268;
+	static const int HELP_BUTTON_MAX_Y = 289;
+
 	static const int MAX_STRING_SIZE = 32;
 
 
@@ -69,6 +80,7 @@ public:
 	// GUI related
 	bool optionsDisplayed;
 	bool aboutDisplayed;
+	bool helpDisplayed;
 	std::string menuItemSelected;
 
 	/****** NOT USED FOR THIS GAME TYPE
@@ -99,6 +111,7 @@ public:
 		//<< "Player's Y pos. = " <<  player_y << "\n"   /****** NOT USED FOR THIS TYPE OF GAME *****
 		<< "optionsDisplayed = " << optionsDisplayed << "\n"
 		<< "aboutDisplayed = " << aboutDisplayed << "\n"
+		<< "helpDisplayed = " << helpDisplayed << "\n"
 		<< "menuItemSelected = " << menuItemSelected << "\n"
 		<< "mouseClicked = " << mouseClicked << "\n"
 		<< "mouseX = " << mouseX << "\n"
