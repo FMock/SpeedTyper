@@ -11,6 +11,9 @@ KeyStates::KeyStates(Game_Data& gd):gameData(&gd),
 									optionButtonPressed(false),
 									optionButtonPressedCount(0),
 									optionsDisplayed(false),
+									aboutButtonPressed(false),
+									aboutButtonPressedCount(0),
+									aboutDisplayed(false),
 									mouseClicked(false),
 									mouseClickedCount(0),
 									mouseX(0),
@@ -53,9 +56,10 @@ void KeyStates::setKeyPressed(){
 				mouseY = event.button.y;
 				gameData->mouseX = mouseX;
 				gameData->mouseY = mouseY;
-				//printf("xPos = %d\n", xPos);
-				//printf("yPos = %d\n", yPos);
+				//printf("xPos = %d\n", mouseX);
+				//printf("yPos = %d\n", mouseY);
 
+				// Options Button
 				if(mouseX > GD::OPTION_BUTTON_MIN_X && mouseX < GD::OPTION_BUTTON_MAX_X && 
 					mouseY > GD::OPTION_BUTTON_MIN_Y && mouseY < GD::OPTION_BUTTON_MAX_Y){
 					optionButtonPressed = true;
@@ -64,6 +68,16 @@ void KeyStates::setKeyPressed(){
 					optionButtonPressedCount % 2 == 0 ? optionsDisplayed = false : optionsDisplayed = true;
 
 					gameData->optionsDisplayed = this->optionsDisplayed;
+				}
+				// About Button
+				if(mouseX > GD::ABOUT_BUTTON_MIN_X && mouseX < GD::ABOUT_BUTTON_MAX_X &&
+					mouseY > GD::ABOUT_BUTTON_MIN_Y && mouseY < GD::ABOUT_BUTTON_MAX_Y && !optionsDisplayed){
+					
+						aboutButtonPressed = true;
+						aboutButtonPressedCount += 1; // odd numbers correspond to open and even to close
+						aboutButtonPressedCount % 2 == 0 ? aboutDisplayed = false : aboutDisplayed = true;
+
+						gameData->aboutDisplayed = this->aboutDisplayed;
 				}
 			}
 			break;
@@ -247,6 +261,9 @@ std::string KeyStates::to_string() const{
 		<< "optionButtonPressed = " << optionButtonPressed << "\n"
 		<< "optionButtonPressedCount = " << optionButtonPressedCount << "\n"
 		<< "optionsDisplayed = " << optionsDisplayed << "\n"
+		<< "aboutButtonPressed = " << aboutButtonPressed << "\n"
+		<< "aboutButtonPressedCount = " << aboutButtonPressedCount << "\n"
+		<< "aboutDisplayed = " << aboutDisplayed << "\n"
 		<< "mouseClicked = " << mouseClicked << "\n"
 		<< "mouseClickedCount = " << mouseClickedCount << "\n"
 		<< "mouseX = " << mouseX << "\n"

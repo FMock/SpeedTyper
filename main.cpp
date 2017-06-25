@@ -18,6 +18,7 @@
 #include"gui.h"
 #include"TextWriter.h"
 #include"stats.h"
+#include"hud.h"
 
 /*
 	main.cpp
@@ -61,6 +62,7 @@ int font_height = 30;
 // Objects
 GUI *gui;
 Stats stats;
+Hud hud;
 TextWriter *textWriter;
 int overlayWidth = 500;
 int overlayHeight = 200;
@@ -75,8 +77,10 @@ int currentTime = 0;
 float deltaTime = 0.0f;
 
 int wordCount = 0;
-std::ifstream inFile; // to read the words from file
-std::string fileName = "words.txt";
+std::ifstream inFile; // for reading files
+std::ofstream outFile; // to write highscore
+std::string wordsFile = "words.txt";
+std::string highScoreFile = "high.txt";
 std::string testing = "";
 
 Timer timer;
@@ -85,13 +89,18 @@ int blockInterval = 4; // Interval in seconds at which a new block appears
 // Function protoTypes
 void readWords(std::ifstream &in);
 void readLines(std::ifstream &in);
+int readHighScore(std::ifstream &in);
+void writeHighScore(std::ofstream &out);
+int string_to_int(std::string);
 bool AABBIntersect(AABB box1, AABB box2);
 
+int high; // track highscore
 bool start = true;
 bool gameOver = false;
 bool paused = true;
 float previousPausePressTime = 0.0f;
 float currentPausePressTime = 0.0f;
+bool bombUsed = false;
 
 static const int Y_POSITION_THRESHOLD = 90;
 static int yPosReached = GD::WINDOW_HEIGHT - GD::BL_FLOOR_TO_BOTTOM;
@@ -166,14 +175,25 @@ int main(void)
 	//********** Game initialization goes here. **********************
 
 	// Read in the words from text file
-	inFile.open(fileName);
+	inFile.open(wordsFile);
 	if(inFile.fail()){
-		printf("Error opening word file %s ", fileName.c_str());
+		printf("Error opening word file %s ", wordsFile.c_str());
 		SDL_Quit();
 		return 1;
 	}
 	readLines(inFile);
 	inFile.close();
+
+	// Read high score from text file
+	inFile.open(highScoreFile);
+	if(inFile.fail()){
+		printf("Error opening high score file %s ", highScoreFile.c_str());
+		SDL_Quit();
+		return 1;
+	}
+	high = readHighScore(inFile);
+	inFile.close();
+
 
 	// **********  LOAD IMAGE RESOURCES ***************************************************
 	gameOverOverlay = glTexImageTGAFile("images/endGame.tga", &overlayWidth, &overlayHeight);
@@ -292,8 +312,10 @@ int main(void)
 	GLuint period = glTexImageTGAFile("images/period.tga", &font_width,&font_height);  // .
 	stringToImageMap["."] = period;
 
-	stats = Stats();
 	gameData = new Game_Data();
+	gameData->highScore = high;
+	hud = Hud(stringToImageMap, *gameData);
+	stats = Stats(*gameData);
 	keyStates = new KeyStates(*gameData);
 	textWriter = new TextWriter(testing, stringToImageMap);
 	gui = new GUI(*keyStates, *gameData);
@@ -445,6 +467,7 @@ int main(void)
 				}
 
 				blocks.push_back(TextBlock(xpos, ypos, 30, 30, words.at(i), stringToImageMap));
+				gameData->currentWord = words.at(i);
 				stats.increaseTotalCount(1); // Keep track of the amount of words presented to player
 			}
 
@@ -478,6 +501,13 @@ int main(void)
 						blocks.at(i).remove = true;
 						fmod_sys->playSound(scoreSound, 0, false, NULL);
 					}
+
+					// Check if player typed 'BOMB' to blowup a word (remove a word)
+					if(testing.compare("BOMB") == 0){
+						bombUsed = true;
+						blocks.at(i).remove = true;
+						fmod_sys->playSound(scoreSound, 0, false, NULL);
+					}
 				}
 			}
 
@@ -500,6 +530,24 @@ int main(void)
 				gameOver = true;
 			}
 		}// END !PAUSED
+
+
+		//****** UPDATE HIGHSCORE FILE ***********************/
+		if(gameOver){
+			if(gameData->score > high){
+				gameData->highScore = gameData->score;
+
+				outFile.open(highScoreFile);
+				if(outFile.fail()){
+					printf("Error opening high score file %s ", highScoreFile.c_str());
+					SDL_Quit();
+					return 1;
+				}
+
+				writeHighScore(outFile);
+				outFile.close();
+			}
+		}
 		
 		//*********** Drawing **********************************************************
 		glClearColor(0, 0, 0, 1);  
@@ -519,6 +567,7 @@ int main(void)
 		}
 
 		gui->draw();
+		hud.draw();
 
 		textWriter->draw();
 
@@ -532,15 +581,19 @@ int main(void)
 			if(blocks.at(i).moving && blocks.at(i).remove){
 				std::string text = blocks.at(i).text;
 				int charCount = text.length();
-				stats.increaseScore(charCount);
-				stats.increaseCorrectCount(1);
+				if(!bombUsed){
+					stats.increaseScore(charCount);
+					stats.increaseCorrectCount(1);
+				}else{
+					stats.decreaseScore(charCount);
+				}
 				blocks.erase(blocks.begin() + i);
 			}
 		}
-
+		bombUsed = false; // reset bomb
 
 		//*********** Troubleshooting *************************************************
-		printf(stats.to_string().c_str());
+		//printf(stats.to_string().c_str());
 		//printf("animals = %i, places = %i, things = %i, transportation = %i, music = %i, anime = %i\n", 
 			//animals, places, things, transportation, music, anime);
 		//printf("resetGame = %i\n", resetGame);
@@ -548,7 +601,7 @@ int main(void)
 		//printf(gem->to_string().c_str());
 		//printf(gui->to_string().c_str());
 		//printf(gameData->to_string().c_str());
-		//printf(keyStates->to_string().c_str());
+		printf(keyStates->to_string().c_str());
 		//printf(timer.to_string().c_str());
 		//if(blocks.size() > 0)
 			//printf(blocks.at(0)->to_string().c_str());
@@ -623,4 +676,33 @@ void readLines(std::ifstream &in){
 		words.push_back(line);
 		wordCount ++;
 	}
+}
+
+// Reads the high score file and updates gameData
+int readHighScore(std::ifstream &in){
+	std::string line;
+	while(std::getline(in, line)){
+		return string_to_int(line);
+	}
+}
+
+// Takes a numeric string and returns its integer representation
+int string_to_int(std::string s){
+	std::istringstream instr(s);
+	int n;
+	instr >> n;
+	return n;
+}
+
+// convert an integer to a string. return the string
+std::string int_to_string(int n){
+	ostringstream oss;
+	oss << n;
+	return oss.str();
+}
+
+// Writes a highscore to file
+void writeHighScore(std::ofstream &out){
+	std::string highStr = int_to_string(gameData->highScore);
+	out << highStr;
 }
