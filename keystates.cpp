@@ -14,6 +14,9 @@ KeyStates::KeyStates(Game_Data& gd):gameData(&gd),
 									aboutButtonPressed(false),
 									aboutButtonPressedCount(0),
 									aboutDisplayed(false),
+									helpButtonPressed(false),
+									helpButtonPressedCount(0),
+									helpDisplayed(false),
 									mouseClicked(false),
 									mouseClickedCount(0),
 									mouseX(0),
@@ -21,12 +24,16 @@ KeyStates::KeyStates(Game_Data& gd):gameData(&gd),
 {
 	std::fill_n(states, 128, 0);
 	gameData->optionsDisplayed = this->optionsDisplayed;
+	gameData->aboutDisplayed = this->aboutDisplayed;
+	gameData->helpDisplayed = this->helpDisplayed;
 }
 
 // Resets key and mouse states to default initial default state
 void KeyStates::zeroAllKeyStates(){
 	std::fill_n(states, 128, 0);
 	optionButtonPressed = false;
+	aboutButtonPressed = false;
+	helpButtonPressed = false;
 	mouseClicked = false;
 	gameData->mouseClicked = false;
 }
@@ -61,7 +68,8 @@ void KeyStates::setKeyPressed(){
 
 				// Options Button
 				if(mouseX > GD::OPTION_BUTTON_MIN_X && mouseX < GD::OPTION_BUTTON_MAX_X && 
-					mouseY > GD::OPTION_BUTTON_MIN_Y && mouseY < GD::OPTION_BUTTON_MAX_Y){
+					mouseY > GD::OPTION_BUTTON_MIN_Y && mouseY < GD::OPTION_BUTTON_MAX_Y &&
+					!helpDisplayed && !aboutDisplayed){
 					optionButtonPressed = true;
 					optionButtonPressedCount += 1; // odd numbers correspond to open and even to close
 
@@ -69,15 +77,29 @@ void KeyStates::setKeyPressed(){
 
 					gameData->optionsDisplayed = this->optionsDisplayed;
 				}
+
 				// About Button
 				if(mouseX > GD::ABOUT_BUTTON_MIN_X && mouseX < GD::ABOUT_BUTTON_MAX_X &&
-					mouseY > GD::ABOUT_BUTTON_MIN_Y && mouseY < GD::ABOUT_BUTTON_MAX_Y && !optionsDisplayed){
+					mouseY > GD::ABOUT_BUTTON_MIN_Y && mouseY < GD::ABOUT_BUTTON_MAX_Y && 
+					!optionsDisplayed && !helpDisplayed){
 					
 						aboutButtonPressed = true;
 						aboutButtonPressedCount += 1; // odd numbers correspond to open and even to close
 						aboutButtonPressedCount % 2 == 0 ? aboutDisplayed = false : aboutDisplayed = true;
 
 						gameData->aboutDisplayed = this->aboutDisplayed;
+				}
+
+				// Help Button
+				if(mouseX > GD::HELP_BUTTON_MIN_X && mouseX < GD::HELP_BUTTON_MAX_X &&
+					mouseY > GD::HELP_BUTTON_MIN_Y && mouseY < GD::HELP_BUTTON_MAX_Y && 
+					!optionsDisplayed && !aboutDisplayed){
+					
+						helpButtonPressed = true;
+						helpButtonPressedCount += 1; // odd numbers correspond to open and even to close
+						helpButtonPressedCount % 2 == 0 ? helpDisplayed = false : helpDisplayed = true;
+
+						gameData->helpDisplayed = this->helpDisplayed;
 				}
 			}
 			break;
@@ -264,6 +286,9 @@ std::string KeyStates::to_string() const{
 		<< "aboutButtonPressed = " << aboutButtonPressed << "\n"
 		<< "aboutButtonPressedCount = " << aboutButtonPressedCount << "\n"
 		<< "aboutDisplayed = " << aboutDisplayed << "\n"
+		<< "helpButtonPressed = " << helpButtonPressed << "\n"
+		<< "helpButtonPressedCount = " << helpButtonPressedCount << "\n"
+		<< "helpDisplayed = " << helpDisplayed << "\n"
 		<< "mouseClicked = " << mouseClicked << "\n"
 		<< "mouseClickedCount = " << mouseClickedCount << "\n"
 		<< "mouseX = " << mouseX << "\n"

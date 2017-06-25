@@ -100,7 +100,7 @@ bool gameOver = false;
 bool paused = true;
 float previousPausePressTime = 0.0f;
 float currentPausePressTime = 0.0f;
-bool bombUsed = false;
+bool kaboomUsed = false;
 
 static const int Y_POSITION_THRESHOLD = 90;
 static int yPosReached = GD::WINDOW_HEIGHT - GD::BL_FLOOR_TO_BOTTOM;
@@ -136,7 +136,7 @@ int main(void)
 	SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_Window* window = SDL_CreateWindow(
-		"SpeedTyper",
+		"Kaboom Typer",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		800, 600,
 		SDL_WINDOW_OPENGL);
@@ -401,7 +401,7 @@ int main(void)
 			float sinceLastPressed = (currentPausePressTime - previousPausePressTime) / 1000.0f;
 
 			if(sinceLastPressed > 0.01){
-				if(paused)
+				if(paused && !gameData->helpDisplayed)
 					paused = false;
 				else
 					paused = true;
@@ -502,9 +502,9 @@ int main(void)
 						fmod_sys->playSound(scoreSound, 0, false, NULL);
 					}
 
-					// Check if player typed 'BOMB' to blowup a word (remove a word)
-					if(testing.compare("BOMB") == 0){
-						bombUsed = true;
+					// Check if player typed 'KABOOM' to blowup a word (remove a word)
+					if(testing.compare("KABOOM") == 0){
+						kaboomUsed = true;
 						blocks.at(i).remove = true;
 						fmod_sys->playSound(scoreSound, 0, false, NULL);
 					}
@@ -571,26 +571,28 @@ int main(void)
 
 		textWriter->draw();
 
-		for(int i = 0; i < blocks.size(); i++){
-			blocks.at(i).draw();
+		if(!gameData->helpDisplayed){ //Don't want textBlocks to obstruct the help instructions
+			for(int i = 0; i < blocks.size(); i++){
+				blocks.at(i).draw();
+			}
 		}
-
 
 		// Remove TextBlocks that have been flagged for removal
 		for(int i = 0; i < blocks.size(); i++){
 			if(blocks.at(i).moving && blocks.at(i).remove){
 				std::string text = blocks.at(i).text;
 				int charCount = text.length();
-				if(!bombUsed){
+				if(!kaboomUsed){
 					stats.increaseScore(charCount);
 					stats.increaseCorrectCount(1);
 				}else{
-					stats.decreaseScore(charCount);
+					// Amount of points lost is equal to half the number of characterss
+					stats.decreaseScore(charCount/2);
 				}
 				blocks.erase(blocks.begin() + i);
 			}
 		}
-		bombUsed = false; // reset bomb
+		kaboomUsed = false; // reset bomb
 
 		//*********** Troubleshooting *************************************************
 		//printf(stats.to_string().c_str());
@@ -601,7 +603,7 @@ int main(void)
 		//printf(gem->to_string().c_str());
 		//printf(gui->to_string().c_str());
 		//printf(gameData->to_string().c_str());
-		printf(keyStates->to_string().c_str());
+		//printf(keyStates->to_string().c_str());
 		//printf(timer.to_string().c_str());
 		//if(blocks.size() > 0)
 			//printf(blocks.at(0)->to_string().c_str());

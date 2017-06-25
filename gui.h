@@ -31,8 +31,12 @@ public:
 	GLuint optionsClosed;
 	GLuint optionsOpen;
 	GLuint helpClosed;
+	GLuint helpOpen;
+	GLuint helpMenu;
 	GLuint aboutClosed;
 	GLuint aboutOpen;
+	GLuint marker_left;
+	GLuint marker_right;
 
 	std::string menuItemSelected;
 	int selectedIndex;
