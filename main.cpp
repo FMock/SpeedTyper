@@ -51,7 +51,6 @@ KeyStates *keyStates;
 const int NUM_BLOCKS = 24;
 
 // Containers
-//std::vector<TextBlock *> blocks = std::vector<TextBlock *>();
 std::vector<TextBlock> blocks = std::vector<TextBlock>();
 std::vector<std::string> words = std::vector<std::string>();
 std::map<std::string, GLuint> stringToImageMap;
