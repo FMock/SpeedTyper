@@ -38,9 +38,11 @@ Hit::Hit(int x, int y, int w, int h,
 }
 
 // x and y should be the camera's x and y
+/*
 void Hit::draw(int x, int y){
 	glDrawSprite(image,  characterPos[0] - x, characterPos[1] - y, characterSize[0], characterSize[1]);
 }
+*/
 
 void Hit::updateAnim(float deltaTime){
 	// update how long the current frame has been displayed

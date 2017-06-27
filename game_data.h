@@ -16,6 +16,7 @@ public:
 								 // player_x(0), /****** NOT USED FOR THIS TYPE OF GAME *****
 								 // player_y(0), /****** NOT USED FOR THIS TYPE OF GAME *****
 								  score(0),
+								  newHighScore(false),
 								  highScore(0),
 								  totalCount(0),
 								  correctCount(0),
@@ -42,6 +43,8 @@ public:
 	static const int BLOCK_AREA_TO_RH_EDGE = 300;
 	static const int BL_FLOOR_TO_BOTTOM = 100;
 	static const int BLOCK_FALL_AREA_MAX_X = 400;
+	static const int HUD_START_X = 520;
+	static const int GAME_STATUS_Y = 340;
 
 	// Button Range points
 	static const int OPTION_BUTTON_MIN_X = 526;
@@ -66,11 +69,13 @@ public:
 	int currentGameState;
 	int score;
 	int highScore;
+	bool newHighScore;
 	int lives_remaining;
 	int level;
 	int totalCount;
 	int correctCount;
 	std::string currentWord;
+	std::string highScoreInitials;
 
 	// Mouse Data
 	bool mouseClicked;
@@ -102,6 +107,8 @@ public:
 	oss << "*************************\n"
 		<< "currentWord = " << currentWord << "\n"
 		<< "score = " << score << "\n"
+		<< "newHighScore = " << newHighScore << "\n"
+		<< "highScoreInitials = " << highScoreInitials << "\n"
 		<< "highScore = " << highScore << "\n"
 		<< "totalCount = " << totalCount << "\n"
 		<< "correctCount = " << correctCount << "\n"

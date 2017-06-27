@@ -1,5 +1,7 @@
 #include"hud.h"
 
+typedef Game_Data GD;
+
 Hud::Hud(std::map<std::string, GLuint>& tMap, Game_Data& g):strToImageMap(tMap),
 	hudWidth(260), 
 	hudHeight(25),
@@ -8,6 +10,7 @@ Hud::Hud(std::map<std::string, GLuint>& tMap, Game_Data& g):strToImageMap(tMap),
 	fontWidth(23),
 	fontHeight(25),
 	startXPos(590),
+	initialsXPos(700),
 	totalStartXPos(660),
 	scoreYPos(82),
 	highScoreYPos(114),
@@ -23,12 +26,13 @@ Hud::Hud(std::map<std::string, GLuint>& tMap, Game_Data& g):strToImageMap(tMap),
 }
 
 void Hud::draw(){
-	glDrawSprite(score, 520, 75, hudWidth, hudHeight);
-	glDrawSprite(wordStats, 520, 107, hudWidth, hudHeight);
-	glDrawSprite(totalWords, 520, 139, hudWidth, hudHeight);
-	glDrawSprite(correct, 520, 171, hudWidth, hudHeight);
+	glDrawSprite(score, GD::HUD_START_X, 75, hudWidth, hudHeight);
+	glDrawSprite(wordStats, GD::HUD_START_X, 107, hudWidth, hudHeight);
+	glDrawSprite(totalWords, GD::HUD_START_X, 139, hudWidth, hudHeight);
+	glDrawSprite(correct, GD::HUD_START_X, 171, hudWidth, hudHeight);
 	drawScore();
 	drawHighScore();
+	drawPlayerInitials();
 	drawTotalCount();
 	drawCorrectCount();
 	glDrawSprite(hudBottom, 520, 203, hudWidthBottom, hudHeightBottom);
@@ -52,6 +56,7 @@ void Hud::drawScore(){
 	}
 }
 
+// Draw the highscore in the HUD
 void Hud::drawHighScore(){
 	//convert the high score to a string
 	std::string highScoreStr = int_to_string(gameData->highScore);
@@ -70,6 +75,23 @@ void Hud::drawHighScore(){
 	}
 }
 
+// Draw player's initials next to the highscore
+void Hud::drawPlayerInitials(){
+	// For each character of initials string, get it's corresponding image from the map and draw it
+	int initialsSize = gameData->highScoreInitials.size();
+	int offset = 0;
+	for(std::string::size_type i = 0; i < initialsSize; ++i) {
+		// convert char to string
+		std::stringstream ss;
+		ss << gameData->highScoreInitials[i];
+		std::string s;
+		ss >> s; // s is a key in strToImageMap
+		glDrawSprite(strToImageMap[s], initialsXPos + offset, highScoreYPos, fontWidth, fontHeight);
+		offset += fontWidth;
+	}
+}
+
+// Draw the total amount of words in the HUD
 void Hud::drawTotalCount(){
 	//convert the total word count to a string
 	std::string totalCountStr = int_to_string(gameData->totalCount);
@@ -88,6 +110,7 @@ void Hud::drawTotalCount(){
 	}
 }
 
+// Draw the number of correctly typed words in the HUD
 void Hud::drawCorrectCount(){
 	//convert the correct word count to a string
 	std::string correctCountStr = int_to_string(gameData->correctCount);
