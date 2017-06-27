@@ -19,6 +19,7 @@
 #include"TextWriter.h"
 #include"stats.h"
 #include"hud.h"
+#include"hit.h"
 
 /*
 	main.cpp
@@ -55,6 +56,16 @@ std::vector<TextBlock> blocks = std::vector<TextBlock>();
 std::vector<std::string> words = std::vector<std::string>();
 std::map<std::string, GLuint> stringToImageMap;
 
+// Containers for hit animations
+std::vector<GLuint> imagesHit;
+std::vector<AnimFrameData> frameInfoHit;
+AnimationData animDataHit; //Hit animation data
+int animWidth = 64;
+int animHeight = 64;
+
+// Container for hit objects
+std::vector<Hit *> hits = std::vector<Hit *>();
+
 int font_width = 30;
 int font_height = 30;
 
@@ -69,6 +80,7 @@ GLuint gameOverOverlay;
 GLuint playing;
 GLuint pausedImg;
 GLuint startImg;
+GLuint newHighScore;
 
 // To regulate frame rate
 int previousTime = 0;
@@ -81,6 +93,8 @@ std::ofstream outFile; // to write highscore
 std::string wordsFile = "words.txt";
 std::string highScoreFile = "high.txt";
 std::string testing = "";
+std::string highScoreInitials = "";
+bool addNewHighScoreInitials = false;
 
 Timer timer;
 int blockInterval = 4; // Interval in seconds at which a new block appears
@@ -94,6 +108,8 @@ int string_to_int(std::string);
 bool AABBIntersect(AABB box1, AABB box2);
 
 int high; // track highscore
+int newHighScoreWidth = 400;
+int newHighScoreHeight = 200;
 bool start = true;
 bool gameOver = false;
 bool paused = true;
@@ -107,6 +123,8 @@ static int yPosReached = GD::WINDOW_HEIGHT - GD::BL_FLOOR_TO_BOTTOM;
 // For sound functionality
 FMOD::System *fmod_sys;
 FMOD::Sound *scoreSound;
+FMOD::Sound *explosion;
+FMOD::Sound *lostPoints;
 
 // category start numbers
 int defaultNum = 0;
@@ -124,6 +142,8 @@ int main(void)
 	FMOD_RESULT fmodResult = System_Create(&fmod_sys);
 	fmod_sys->init(100, FMOD_INIT_NORMAL, 0);
 	fmod_sys->createSound("sounds/score_sound.wav", FMOD_DEFAULT, 0, &scoreSound);
+	fmod_sys->createSound("sounds/explode.wav", FMOD_DEFAULT, 0, &explosion);
+	fmod_sys->createSound("sounds/lost_points.wav", FMOD_DEFAULT, 0, &lostPoints);
 
 	// Initialize SDL.
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -199,6 +219,25 @@ int main(void)
 	playing = glTexImageTGAFile("images/playing.tga", &overlayWidth, &overlayHeight);
 	pausedImg = glTexImageTGAFile("images/paused.tga", &overlayWidth, &overlayHeight);
 	startImg = glTexImageTGAFile("images/startImg.tga", &overlayWidth, &overlayHeight);
+	newHighScore = glTexImageTGAFile("images/new_high_score.tga", &newHighScoreWidth, &newHighScoreHeight);
+
+
+	//******* Hit Animation **********************************************************
+	frameInfoHit.push_back(AnimFrameData(0, 12)); // Animation #0 
+	imagesHit.push_back(glTexImageTGAFile("images/hit_00.tga", &animWidth, &animHeight)); // #0
+	imagesHit.push_back(glTexImageTGAFile("images/hit_01.tga", &animWidth, &animHeight));
+	imagesHit.push_back(glTexImageTGAFile("images/hit_02.tga", &animWidth, &animHeight));
+	imagesHit.push_back(glTexImageTGAFile("images/hit_03.tga", &animWidth, &animHeight));
+	imagesHit.push_back(glTexImageTGAFile("images/hit_04.tga", &animWidth, &animHeight)); // #4
+	imagesHit.push_back(glTexImageTGAFile("images/hit_05.tga", &animWidth, &animHeight));
+	imagesHit.push_back(glTexImageTGAFile("images/hit_06.tga", &animWidth, &animHeight));
+	imagesHit.push_back(glTexImageTGAFile("images/hit_07.tga", &animWidth, &animHeight));
+	imagesHit.push_back(glTexImageTGAFile("images/hit_08.tga", &animWidth, &animHeight));
+	imagesHit.push_back(glTexImageTGAFile("images/hit_09.tga", &animWidth, &animHeight));
+	imagesHit.push_back(glTexImageTGAFile("images/hit_10.tga", &animWidth, &animHeight));
+	imagesHit.push_back(glTexImageTGAFile("images/hit_11.tga", &animWidth, &animHeight));
+	animDataHit = AnimationData(imagesHit, frameInfoHit);
+
 
 
 	/*Initialize the stringToImageMap
@@ -313,6 +352,7 @@ int main(void)
 
 	gameData = new Game_Data();
 	gameData->highScore = high;
+	gameData->highScoreInitials = highScoreInitials;
 	hud = Hud(stringToImageMap, *gameData);
 	stats = Stats(*gameData);
 	keyStates = new KeyStates(*gameData);
@@ -347,7 +387,15 @@ int main(void)
 				std::string temp = SDL_GetKeyName(i);
 				//printf(temp.c_str());
 				if(temp.compare("Return") == 0){
-					testing = "";
+					if(!gameData->newHighScore){
+						testing = "";
+					}else{
+						highScoreInitials = testing;
+						gameData->highScoreInitials = highScoreInitials;
+						testing = "";
+						gameData->newHighScore = false;
+						addNewHighScoreInitials = true;
+					}
 				}else if(temp.compare("Space") == 0){
 					if(testing.size() < GD::MAX_STRING_SIZE)
 						testing.append(" ");
@@ -386,6 +434,8 @@ int main(void)
 			gameOver = false;
 			paused = false;
 			start = false;
+			gameData->newHighScore = false;
+			addNewHighScoreInitials = false;
 		}
 		else if (kbState[SDL_SCANCODE_LEFT]) {
 			//printf("Left arrow pressed\n");
@@ -475,6 +525,11 @@ int main(void)
 
 			timer.update();
 
+			/*****  Update hits  *****/
+			for(int i = 0; i < hits.size(); i++){
+				hits.at(i)->updateAnim(deltaTime);
+			}
+
 			// update TextBlocks
 			for(int i = 0; i < blocks.size(); i++){
 
@@ -499,13 +554,18 @@ int main(void)
 					if(!blocks.at(i).remove && blocks.at(i).text.compare(testing) == 0){
 						blocks.at(i).remove = true;
 						fmod_sys->playSound(scoreSound, 0, false, NULL);
+						fmod_sys->playSound(explosion, 0, false, NULL);
+
+						// create a hit animation object ( A blowup animation )
+						hits.push_back(new Hit(blocks.at(i).getXPos(), blocks.at(i).getYPos(), 64, 64, animDataHit, 0));
 					}
 
 					// Check if player typed 'KABOOM' to blowup a word (remove a word)
 					if(testing.compare("KABOOM") == 0){
 						kaboomUsed = true;
 						blocks.at(i).remove = true;
-						fmod_sys->playSound(scoreSound, 0, false, NULL);
+						fmod_sys->playSound(lostPoints, 0, false, NULL);
+						fmod_sys->playSound(explosion, 0, false, NULL);
 					}
 				}
 			}
@@ -535,6 +595,7 @@ int main(void)
 		if(gameOver){
 			if(gameData->score > high){
 				gameData->highScore = gameData->score;
+				gameData->newHighScore = true;
 
 				outFile.open(highScoreFile);
 				if(outFile.fail()){
@@ -554,26 +615,36 @@ int main(void)
 
 		if(paused){
 			if(start){
-				glDrawSprite(startImg, 520, 340, overlayWidth, overlayHeight);
+				glDrawSprite(startImg, GD::HUD_START_X, GD::GAME_STATUS_Y, overlayWidth, overlayHeight);
 			}else{
-				glDrawSprite(pausedImg, 520, 340, overlayWidth, overlayHeight);
+				glDrawSprite(pausedImg, GD::HUD_START_X, GD::GAME_STATUS_Y, overlayWidth, overlayHeight);
 			}
 		}
 		else if(gameOver){
-			glDrawSprite(gameOverOverlay, 520, 340, overlayWidth, overlayHeight);
+			glDrawSprite(gameOverOverlay, GD::HUD_START_X, GD::GAME_STATUS_Y, overlayWidth, overlayHeight);
 		}else{
-			glDrawSprite(playing, 520, 340, overlayWidth, overlayHeight);
+			glDrawSprite(playing, GD::HUD_START_X, GD::GAME_STATUS_Y, overlayWidth, overlayHeight);
 		}
 
 		gui->draw();
 		hud.draw();
-
 		textWriter->draw();
+
 
 		if(!gameData->helpDisplayed){ //Don't want textBlocks to obstruct the help instructions
 			for(int i = 0; i < blocks.size(); i++){
 				blocks.at(i).draw();
 			}
+		}
+
+		if(gameOver && gameData->newHighScore){
+			//if new high score show the newHighScore image
+			glDrawSprite(newHighScore, 60, 200, newHighScoreWidth, newHighScoreHeight);
+		}
+
+		/*****  Draw hits  *****/
+		for(int i = 0; i < hits.size(); i++){
+			hits.at(i)->draw();
 		}
 
 		// Remove TextBlocks that have been flagged for removal
@@ -591,6 +662,13 @@ int main(void)
 				blocks.erase(blocks.begin() + i);
 			}
 		}
+
+		//******* Remove hits (a.k.a explosions) that have finished playing ********//
+		for(int i = 0; i < hits.size(); i++){
+			if(hits.at(i)->finished == true)
+				hits.erase(hits.begin() + i);
+		}
+
 		kaboomUsed = false; // reset bomb
 
 		//*********** Troubleshooting *************************************************
@@ -601,7 +679,7 @@ int main(void)
 		//printf("yPosReached = %i\n", yPosReached);
 		//printf(gem->to_string().c_str());
 		//printf(gui->to_string().c_str());
-		//printf(gameData->to_string().c_str());
+		printf(gameData->to_string().c_str());
 		//printf(keyStates->to_string().c_str());
 		//printf(timer.to_string().c_str());
 		//if(blocks.size() > 0)
@@ -682,9 +760,11 @@ void readLines(std::ifstream &in){
 // Reads the high score file and updates gameData
 int readHighScore(std::ifstream &in){
 	std::string line;
-	while(std::getline(in, line)){
-		return string_to_int(line);
-	}
+	std::string line2;
+	std::getline(in, line);  // First line has the highscore
+	std::getline(in, line2); // Second line has players initials
+	highScoreInitials = line2;
+	return string_to_int(line);
 }
 
 // Takes a numeric string and returns its integer representation
@@ -702,8 +782,12 @@ std::string int_to_string(int n){
 	return oss.str();
 }
 
-// Writes a highscore to file
+// Writes a highscore to file and player's initials
 void writeHighScore(std::ofstream &out){
 	std::string highStr = int_to_string(gameData->highScore);
-	out << highStr;
+	if(!addNewHighScoreInitials){
+		out << highStr << "\n";
+	}else{
+		out << highStr << "\n" << gameData->highScoreInitials;
+	}
 }

@@ -34,7 +34,7 @@ public:
 	// The FPS the animation is running at (24 FPS by default)
 	float animFPS;
 	void updateAnim(float deltaTime);
-	void draw(int, int);
+	//void draw(int, int);
 	void changeAnim(int num);
 	void moveLeft();
 	void moveRight();

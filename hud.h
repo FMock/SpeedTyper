@@ -16,6 +16,7 @@ public:
 	int fontWidth;
 	int fontHeight;
 	int startXPos;
+	int initialsXPos;
 	int totalStartXPos;
 	int correctStartXPos;
 	int scoreYPos;
@@ -36,6 +37,7 @@ public:
 private:
 	void drawScore();
 	void drawHighScore();
+	void drawPlayerInitials();
 	void drawTotalCount();
 	void drawCorrectCount();
 };
