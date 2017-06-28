@@ -25,6 +25,9 @@ public:
 								  aboutDisplayed(false),
 								  helpDisplayed(false),
 								  level(0),
+								  playMusic(true),
+								  playMusicOptionCount(0),
+								  playMenuSelectionSound(false),
 								 // player_direction(0),  /****** NOT USED FOR THIS TYPE OF GAME *****
 								  lives_remaining(0),
 								  mouseClicked(false),
@@ -62,6 +65,11 @@ public:
 	static const int HELP_BUTTON_MIN_Y = 268;
 	static const int HELP_BUTTON_MAX_Y = 289;
 
+	static const int PLAY_MUSIC_OPTION_MIN_X = 745;
+	static const int PLAY_MUSIC_OPTION_MAX_X = 767;
+	static const int PLAY_MUSIC_OPTION_MIN_Y = 490;
+	static const int PLAY_MUSIC_OPTION_MAX_Y = 507;
+
 	static const int MAX_STRING_SIZE = 32;
 
 
@@ -76,6 +84,9 @@ public:
 	int correctCount;
 	std::string currentWord;
 	std::string highScoreInitials;
+	bool playMusic;
+	int playMusicOptionCount;
+	bool playMenuSelectionSound;
 
 	// Mouse Data
 	bool mouseClicked;
@@ -116,6 +127,8 @@ public:
 		<< "lives remaining = " << lives_remaining << "\n"
 		//<< "Player's X pos. = " <<  player_x << "\n"   /****** NOT USED FOR THIS TYPE OF GAME *****
 		//<< "Player's Y pos. = " <<  player_y << "\n"   /****** NOT USED FOR THIS TYPE OF GAME *****
+		<< "playMusic = " << playMusic << "\n"
+		<< "playMusicOptionCount = " << playMusicOptionCount << "\n"
 		<< "optionsDisplayed = " << optionsDisplayed << "\n"
 		<< "aboutDisplayed = " << aboutDisplayed << "\n"
 		<< "helpDisplayed = " << helpDisplayed << "\n"

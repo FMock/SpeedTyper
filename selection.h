@@ -12,6 +12,7 @@
 class Selection{
 public:
 	Selection(std::string selection, int, int, int, int, bool);
+	inline Selection(){}; //will never be used
 	GLuint selectedImage;
 	int xMin, xMax; 
 	int yMin, yMax;

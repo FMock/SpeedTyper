@@ -2,17 +2,21 @@
 
 typedef Game_Data GD;
 
-GUI::GUI(KeyStates& k, Game_Data& g){
-	keyStates = &k;
-	gameData = &g;
+GUI::GUI(KeyStates& k, Game_Data& g):keyStates(&k),
+									 gameData(&g),
+									 width(20),
+									 height(20),
+									 options(false),
+									 menuItemSelected("default"),
+									 selectedIndex(0),
+									 playMusicOptionCount(0){
 	loadImages();
-	width = 20;
-	height = 20;
-	options = false;
-	menuItemSelected = "default";
 	gameData->menuItemSelected = menuItemSelected;
-	selectedIndex = 0;
 	buildSelections();
+	musicOptionSelection = Selection("playMusicOption", gameData->PLAY_MUSIC_OPTION_MIN_X, 
+														gameData->PLAY_MUSIC_OPTION_MAX_X, 
+														gameData->PLAY_MUSIC_OPTION_MIN_Y, 
+														gameData->PLAY_MUSIC_OPTION_MAX_Y, true);
 }
 
 // Fills vector with Selection objects for category menu itmes
@@ -24,7 +28,6 @@ void GUI::buildSelections(){
 	selectionItems.push_back(Selection("transportation", 745, 767, 390, 407, false));
 	selectionItems.push_back(Selection("music", 745, 767, 416, 433, false));
 	selectionItems.push_back(Selection("anime", 745, 767, 440, 457, false));
-	selectionItems.push_back(Selection("music_and_sound", 745, 767, 490, 507, false));
 }
 
 void GUI::loadImages(){
@@ -55,14 +58,29 @@ void GUI::update(float deltaTime){
 	// If options are being shown, check/change menu selection
 	if(keyStates->optionsDisplayed){
 		if(keyStates->mouseClicked){
+			// Check if Music Play option has been selected
+			if(keyStates->mouseX > GD::PLAY_MUSIC_OPTION_MIN_X && 
+			   keyStates->mouseX < GD::PLAY_MUSIC_OPTION_MAX_X && 
+			   keyStates->mouseY > GD::PLAY_MUSIC_OPTION_MIN_Y && 
+			   keyStates->mouseY < GD::PLAY_MUSIC_OPTION_MAX_Y){
+				   gameData->playMenuSelectionSound = true; // main will respond by playing sound
+				   playMusicOptionCount += 1;
+				   gameData->playMusicOptionCount += 1;
+
+				   // PlayMusic? odd count is false, even count is true
+				   playMusicOptionCount % 2 == 0 ? gameData->playMusic = true : gameData->playMusic = false;
+			}
+
+			// Check each word category selection options
 			for(int i = 0; i < selectionItems.size(); i++){
 				if(keyStates->mouseX >= selectionItems.at(i).xMin &&
 					keyStates->mouseX <= selectionItems.at(i).xMax &&
 					keyStates->mouseY >= selectionItems.at(i).yMin &&
 					keyStates->mouseY <= selectionItems.at(i).yMax){
 					
-					    // A menus item was clicked
+					    // A menu item was clicked
 						if(i != selectedIndex){
+							gameData->playMenuSelectionSound = true; // main will respond by playing sound
 							selectionItems.at(i).selected = true;
 							selectionItems.at(selectedIndex).selected = false;
 							selectedIndex = i;
@@ -118,6 +136,11 @@ void GUI::draw(){
 
 	// Only draw the menu selections if the options are being displayed
 	if(keyStates->optionsDisplayed){
+
+		if(playMusicOptionCount % 2 == 0)
+			musicOptionSelection.draw(); // music play/no-play menu option
+
+		// Word category selection options
 		for(int i = 0; i < selectionItems.size(); i++){
 			selectionItems.at(i).draw();
 		}

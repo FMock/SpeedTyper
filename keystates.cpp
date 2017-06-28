@@ -66,11 +66,12 @@ void KeyStates::setKeyPressed(){
 				//printf("xPos = %d\n", mouseX);
 				//printf("yPos = %d\n", mouseY);
 
-				// Options Button
+				// Options Button Pressed
 				if(mouseX > GD::OPTION_BUTTON_MIN_X && mouseX < GD::OPTION_BUTTON_MAX_X && 
 					mouseY > GD::OPTION_BUTTON_MIN_Y && mouseY < GD::OPTION_BUTTON_MAX_Y &&
 					!helpDisplayed && !aboutDisplayed){
 					optionButtonPressed = true;
+					gameData->playMenuSelectionSound = true; // main will respond by playing sound
 					optionButtonPressedCount += 1; // odd numbers correspond to open and even to close
 
 					optionButtonPressedCount % 2 == 0 ? optionsDisplayed = false : optionsDisplayed = true;
@@ -78,24 +79,24 @@ void KeyStates::setKeyPressed(){
 					gameData->optionsDisplayed = this->optionsDisplayed;
 				}
 
-				// About Button
+				// About Button Pressed
 				if(mouseX > GD::ABOUT_BUTTON_MIN_X && mouseX < GD::ABOUT_BUTTON_MAX_X &&
 					mouseY > GD::ABOUT_BUTTON_MIN_Y && mouseY < GD::ABOUT_BUTTON_MAX_Y && 
 					!optionsDisplayed && !helpDisplayed){
-					
 						aboutButtonPressed = true;
+						gameData->playMenuSelectionSound = true; // main will respond by playing sound
 						aboutButtonPressedCount += 1; // odd numbers correspond to open and even to close
 						aboutButtonPressedCount % 2 == 0 ? aboutDisplayed = false : aboutDisplayed = true;
 
 						gameData->aboutDisplayed = this->aboutDisplayed;
 				}
 
-				// Help Button
+				// Help Button Pressed
 				if(mouseX > GD::HELP_BUTTON_MIN_X && mouseX < GD::HELP_BUTTON_MAX_X &&
 					mouseY > GD::HELP_BUTTON_MIN_Y && mouseY < GD::HELP_BUTTON_MAX_Y && 
 					!optionsDisplayed && !aboutDisplayed){
-					
 						helpButtonPressed = true;
+						gameData->playMenuSelectionSound = true; // main will respond by playing sound
 						helpButtonPressedCount += 1; // odd numbers correspond to open and even to close
 						helpButtonPressedCount % 2 == 0 ? helpDisplayed = false : helpDisplayed = true;
 
