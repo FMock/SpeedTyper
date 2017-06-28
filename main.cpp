@@ -125,6 +125,7 @@ FMOD::System *fmod_sys;
 FMOD::Sound *scoreSound;
 FMOD::Sound *explosion;
 FMOD::Sound *lostPoints;
+FMOD::Sound *optionSelectSound;
 
 // category start numbers
 int defaultNum = 0;
@@ -144,6 +145,7 @@ int main(void)
 	fmod_sys->createSound("sounds/score_sound.wav", FMOD_DEFAULT, 0, &scoreSound);
 	fmod_sys->createSound("sounds/explode.wav", FMOD_DEFAULT, 0, &explosion);
 	fmod_sys->createSound("sounds/lost_points.wav", FMOD_DEFAULT, 0, &lostPoints);
+	fmod_sys->createSound("sounds/option_select.wav", FMOD_DEFAULT, 0, &optionSelectSound);
 
 	// Initialize SDL.
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -373,6 +375,10 @@ int main(void)
 		gameData->deltaTime = deltaTime;
 
 		//*********** Get Player Input ***************************************
+		if(gameData->playMenuSelectionSound){
+			fmod_sys->playSound(optionSelectSound, 0, false, NULL);
+			gameData->playMenuSelectionSound = false;
+		}
 
 		assert(glGetError() == GL_NO_ERROR);
 		memcpy(kbPrevState, kbState, sizeof(kbPrevState));

@@ -22,7 +22,9 @@ public:
 	void loadImages();
 	KeyStates *keyStates;
 	Game_Data *gameData;
-	std::vector<Selection> selectionItems;
+	std::vector<Selection> selectionItems; // word category selections
+	Selection musicOptionSelection;
+	int playMusicOptionCount;
 	GLuint logo;
 	GLuint cloudBackground;
 	GLuint textTypeArea;
