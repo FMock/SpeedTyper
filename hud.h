@@ -6,6 +6,10 @@
 #include <sstream>
 #include"game_data.h"
 
+/* HUD (Heads Up Display)
+ * To display useful info to player such as score, high score, ect.
+ */
+
 class Hud{
 public:
 	Game_Data *gameData;
