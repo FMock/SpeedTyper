@@ -126,6 +126,8 @@ FMOD::Sound *scoreSound;
 FMOD::Sound *explosion;
 FMOD::Sound *lostPoints;
 FMOD::Sound *optionSelectSound;
+FMOD::Sound *bgMusic;  // for background music
+FMOD::Channel *bgChan; // for background music
 
 // category start numbers
 int defaultNum = 0;
@@ -146,6 +148,9 @@ int main(void)
 	fmod_sys->createSound("sounds/explode.wav", FMOD_DEFAULT, 0, &explosion);
 	fmod_sys->createSound("sounds/lost_points.wav", FMOD_DEFAULT, 0, &lostPoints);
 	fmod_sys->createSound("sounds/option_select.wav", FMOD_DEFAULT, 0, &optionSelectSound);
+
+	// Use a stream for background music, set it to loop
+	fmod_sys->createStream("sounds/background_music.mp3", FMOD_LOOP_NORMAL, 0, &bgMusic);
 
 	// Initialize SDL.
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -364,6 +369,8 @@ int main(void)
 
 	blocks.reserve(24); // Try to prevent blocks vector resize overhead
 
+	fmod_sys->playSound(bgMusic, 0, false, &bgChan); // Start playing background music
+
 	//********** GAME LOOP *************************************************************
 	kbState = SDL_GetKeyboardState(NULL);
 	while (!shouldExit) {
@@ -455,11 +462,10 @@ int main(void)
 			currentPausePressTime = SDL_GetTicks();
 			float sinceLastPressed = (currentPausePressTime - previousPausePressTime) / 1000.0f;
 
-			if(sinceLastPressed > 0.01){
-				if(paused && !gameData->helpDisplayed)
-					paused = false;
-				else
-					paused = true;
+			if(sinceLastPressed > 0.02){
+
+				(paused && !gameData->helpDisplayed) ? paused = false : paused = true;
+
 			}
 		}
 		else if (kbState[SDL_SCANCODE_UP]) {
@@ -653,7 +659,7 @@ int main(void)
 			hits.at(i)->draw();
 		}
 
-		// Remove TextBlocks that have been flagged for removal
+		// Remove TextBlocks that have been flagged for removal and increase/decrease score
 		for(int i = 0; i < blocks.size(); i++){
 			if(blocks.at(i).moving && blocks.at(i).remove){
 				std::string text = blocks.at(i).text;
@@ -675,7 +681,13 @@ int main(void)
 				hits.erase(hits.begin() + i);
 		}
 
-		kaboomUsed = false; // reset bomb
+		kaboomUsed = false; // reset kaboom flag
+
+		// ********** Background Music Play/No Play ******************
+		if(!gameData->playMusic)
+			fmod_sys->playSound(bgMusic, 0, false, &bgChan); // Play background music
+		else
+			fmod_sys->playSound(NULL, 0, false, &bgChan); // No  background music
 
 		//*********** Troubleshooting *************************************************
 		//printf(stats.to_string().c_str());
@@ -685,7 +697,7 @@ int main(void)
 		//printf("yPosReached = %i\n", yPosReached);
 		//printf(gem->to_string().c_str());
 		//printf(gui->to_string().c_str());
-		printf(gameData->to_string().c_str());
+		//printf(gameData->to_string().c_str());
 		//printf(keyStates->to_string().c_str());
 		//printf(timer.to_string().c_str());
 		//if(blocks.size() > 0)
@@ -706,6 +718,7 @@ int main(void)
 
 /*
 * Checks AABB/AABB collisions
+* Used to determine if a TextBlock has touched another TextBlock
 */
 bool AABBIntersect(AABB box1, AABB box2){
 	//box1 to the right

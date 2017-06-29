@@ -11,6 +11,9 @@ Selection::Selection(std::string name, int xMin, int xMax, int yMin, int yMax, b
 	selectedImage = glTexImageTGAFile("images/selected.tga", &width, &height);
 }
 
+/* Only Draw selection if selection flag is true
+ * GUI will set/unset selection flag
+ */
 void Selection::draw(){
 	int xPad = 1;
 	int yPad = 2;
