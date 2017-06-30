@@ -26,7 +26,8 @@
 	
 	Program Name - SpeedTyper
 	Author - Frank Mock
-	Project Start Date - 06/2017
+	Project Start Date - 06/01/2017
+	First Draft Finish - 06/29/2017
 */
 
 typedef Game_Data GD;
@@ -81,6 +82,9 @@ GLuint playing;
 GLuint pausedImg;
 GLuint startImg;
 GLuint newHighScore;
+GLuint end_game_instructions;
+GLuint get_ready;
+GLuint begin;
 
 // To regulate frame rate
 int previousTime = 0;
@@ -116,6 +120,8 @@ bool paused = true;
 float previousPausePressTime = 0.0f;
 float currentPausePressTime = 0.0f;
 bool kaboomUsed = false;
+bool showEndGameInstructions = false;
+bool showGetReady = false;
 
 static const int Y_POSITION_THRESHOLD = 90;
 static int yPosReached = GD::WINDOW_HEIGHT - GD::BL_FLOOR_TO_BOTTOM;
@@ -227,6 +233,9 @@ int main(void)
 	pausedImg = glTexImageTGAFile("images/paused.tga", &overlayWidth, &overlayHeight);
 	startImg = glTexImageTGAFile("images/startImg.tga", &overlayWidth, &overlayHeight);
 	newHighScore = glTexImageTGAFile("images/new_high_score.tga", &newHighScoreWidth, &newHighScoreHeight);
+	end_game_instructions = glTexImageTGAFile("images/end_game_instructions.tga", &newHighScoreWidth, &newHighScoreHeight);
+	get_ready = glTexImageTGAFile("images/get_ready.tga", &newHighScoreWidth, &newHighScoreHeight);
+	begin = glTexImageTGAFile("images/begin.tga", &newHighScoreWidth, &newHighScoreHeight);
 
 
 	//******* Hit Animation **********************************************************
@@ -403,11 +412,19 @@ int main(void)
 					if(!gameData->newHighScore){
 						testing = "";
 					}else{
-						highScoreInitials = testing;
-						gameData->highScoreInitials = highScoreInitials;
+						// A new highscore - get players initials
+						if(testing.size() < 4){ // Initials entered have length < 4
+							highScoreInitials = testing;
+							gameData->highScoreInitials = highScoreInitials;
+						}else{
+							highScoreInitials = testing.substr(0, 3); //Only want three characters
+							gameData->highScoreInitials = highScoreInitials;
+						}
 						testing = "";
 						gameData->newHighScore = false;
 						addNewHighScoreInitials = true;
+						if(!gameData->newHighScore)
+							showEndGameInstructions = true;
 					}
 				}else if(temp.compare("Space") == 0){
 					if(testing.size() < GD::MAX_STRING_SIZE)
@@ -449,9 +466,19 @@ int main(void)
 			start = false;
 			gameData->newHighScore = false;
 			addNewHighScoreInitials = false;
+			showEndGameInstructions = false;
+
+			/* Show 'Get Ready' at beginning when right arrow is pressed
+			 * When first TextBlock moves 'Get Ready' will go away */
+			showGetReady = true;
 		}
 		else if (kbState[SDL_SCANCODE_LEFT]) {
 			//printf("Left arrow pressed\n");
+
+			/* Show 'Get Ready' at beginning when left arrow is pressed
+			 * When first TextBlock moves get ready will go away */
+			if(gameData->currentWord.compare("") == 0 && !gameOver)
+				showGetReady = true;
 
 			start = false;
 
@@ -552,6 +579,7 @@ int main(void)
 
 				// If a block is moving, check for collisons
 				if(blocks.at(i).moving){
+					showGetReady = false;
 
 					// Check for collisons with blocks in lower index
 					if(i > 0){
@@ -627,6 +655,7 @@ int main(void)
 
 		if(paused){
 			if(start){
+				// Shown at start of a new game
 				glDrawSprite(startImg, GD::HUD_START_X, GD::GAME_STATUS_Y, overlayWidth, overlayHeight);
 			}else{
 				glDrawSprite(pausedImg, GD::HUD_START_X, GD::GAME_STATUS_Y, overlayWidth, overlayHeight);
@@ -639,6 +668,12 @@ int main(void)
 		}
 
 		gui->draw();
+
+		// Show at the beginning of the game
+		if(paused && start && !gameData->helpDisplayed){
+			glDrawSprite(begin, 60, 200, newHighScoreWidth, newHighScoreHeight);
+		}
+
 		hud.draw();
 		textWriter->draw();
 
@@ -649,9 +684,17 @@ int main(void)
 			}
 		}
 
+		// Should only be set at beginning after right arrow key pressed, but
+		// before textBlock is shown
+		if(showGetReady)
+			glDrawSprite(get_ready, 60, 200, newHighScoreWidth, newHighScoreHeight);
+
 		if(gameOver && gameData->newHighScore){
 			//if new high score show the newHighScore image
 			glDrawSprite(newHighScore, 60, 200, newHighScoreWidth, newHighScoreHeight);
+			if(showEndGameInstructions){
+				glDrawSprite(end_game_instructions, 60, 200, newHighScoreWidth, newHighScoreHeight);
+			}
 		}
 
 		/*****  Draw hits  *****/
