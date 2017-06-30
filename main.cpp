@@ -27,7 +27,7 @@
 	Program Name - SpeedTyper
 	Author - Frank Mock
 	Project Start Date - 06/01/2017
-	First Draft Finish - 06/29/2017
+	First Draft Finish - 06/30/2017
 */
 
 typedef Game_Data GD;
@@ -562,7 +562,7 @@ int main(void)
 			if(timer.count == blockInterval)
 				timer.reSet();
 
-			timer.update();
+			timer.update(deltaTime);
 
 			/*****  Update hits  *****/
 			for(int i = 0; i < hits.size(); i++){
