@@ -101,7 +101,7 @@ std::string highScoreInitials = "";
 bool addNewHighScoreInitials = false;
 
 Timer timer;
-int blockInterval = 4; // Interval in seconds at which a new block appears
+int blockInterval = 5; // Interval in seconds at which a new block appears
 
 // Function protoTypes
 void readWords(std::ifstream &in);
