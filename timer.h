@@ -31,13 +31,14 @@ public:
 	inline void Timer::reSet(){ reset = true;}
 
 	// Advance the elapsed time or reset the seconds count
-	inline void update(){
+	inline void update(float deltaTime){
 
 		if(reset)
 			count = 0;
 		else{
 			prevTime = time;
 			int ms = SDL_GetTicks();
+			time += deltaTime;
 			time = (ms - time) / 1000;
 			if(time - prevTime == 1)
 				count++;
