@@ -27,7 +27,7 @@
 	Program Name - SpeedTyper
 	Author - Frank Mock
 	Project Start Date - 06/01/2017
-	First Draft Finish - 06/30/2017
+	First Draft Finish - 07/01/2017
 */
 
 typedef Game_Data GD;
@@ -110,6 +110,7 @@ int readHighScore(std::ifstream &in);
 void writeHighScore(std::ofstream &out);
 int string_to_int(std::string);
 bool AABBIntersect(AABB box1, AABB box2);
+void createSound(const char *name, FMOD::Sound **sound);
 
 int high; // track highscore
 int newHighScoreWidth = 400;
@@ -150,10 +151,12 @@ int main(void)
 	// Sound Setup
 	FMOD_RESULT fmodResult = System_Create(&fmod_sys);
 	fmod_sys->init(100, FMOD_INIT_NORMAL, 0);
-	fmod_sys->createSound("sounds/score_sound.wav", FMOD_DEFAULT, 0, &scoreSound);
-	fmod_sys->createSound("sounds/explode.wav", FMOD_DEFAULT, 0, &explosion);
-	fmod_sys->createSound("sounds/lost_points.wav", FMOD_DEFAULT, 0, &lostPoints);
-	fmod_sys->createSound("sounds/option_select.wav", FMOD_DEFAULT, 0, &optionSelectSound);
+
+	// If createSound fails, continue game anyway
+	createSound("sounds/score_sound.wav", &scoreSound);
+	createSound("sounds/explode.wav", &explosion);
+	createSound("sounds/lost_points.wav", &lostPoints);
+	createSound("sounds/option_select.wav", &optionSelectSound);
 
 	// Use a stream for background music, set it to loop
 	fmod_sys->createStream("sounds/background_music.mp3", FMOD_LOOP_NORMAL, 0, &bgMusic);
@@ -598,14 +601,18 @@ int main(void)
 
 						// create a hit animation object ( A blowup animation )
 						hits.push_back(new Hit(blocks.at(i).getXPos(), blocks.at(i).getYPos(), 64, 64, animDataHit, 0));
+						testing = ""; // clear the letters typed
 					}
 
 					// Check if player typed 'KABOOM' to blowup a word (remove a word)
 					if(testing.compare("KABOOM") == 0){
+						// create a hit animation object ( A blowup animation )
+						hits.push_back(new Hit(blocks.at(i).getXPos(), blocks.at(i).getYPos(), 64, 64, animDataHit, 0));
 						kaboomUsed = true;
 						blocks.at(i).remove = true;
 						fmod_sys->playSound(lostPoints, 0, false, NULL);
 						fmod_sys->playSound(explosion, 0, false, NULL);
+						testing = ""; // clear the letters typed
 					}
 				}
 			}
@@ -852,4 +859,12 @@ void writeHighScore(std::ofstream &out){
 	}else{
 		out << highStr << "\n" << gameData->highScoreInitials;
 	}
+}
+
+/*
+ * Loads a sound into memory. If fails, print which file failed and continue
+ */
+void createSound(const char *name, FMOD::Sound **sound){
+	if(!fmod_sys->createSound(name, FMOD_DEFAULT, 0, sound) == FMOD_OK)
+		printf("Could not load sound %s\n", name);
 }
