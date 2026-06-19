@@ -1,9 +1,26 @@
-*/Debug
-*/Release
+# Build output
+build/
+[Dd]ebug/
+[Rr]elease/
+Win32/
+x64/
+*.obj
+*.pdb
+*.ilk
+*.idb
+*.exp
+*.tlog
+*.log
+
+# Visual Studio user-specific / cache files
+.vs/
 *.user
-*.vcxproj
-*.filters
-*.sdf
-*.sln
 *.suo
+*.sdf
 *.opensdf
+*.VC.db
+*.VC.opendb
+*.aps
+
+# NOTE: KaboomTyper.sln / *.vcxproj / *.filters and the third_party/ folder
+# are intentionally tracked so the project can be cloned and built directly.
