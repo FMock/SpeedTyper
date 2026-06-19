@@ -451,17 +451,13 @@ int main(void)
 			//printf("Right arrow pressed\n");
 
 			//******* RESET THE GAME ****************************
-			// Flag blocks for removal
-			for(int i = 0; i < blocks.size(); i++){
-				blocks.at(i).remove = true;
-			}
+			// Remove all blocks
+			blocks.clear();
 
-			// Remove TextBlocks that have been flagged for removal
-			for(int i = 0; i < blocks.size(); i++){
-				if(blocks.at(i).remove){
-					blocks.erase(blocks.begin() + i);
-				}
-			}
+			// Remove any in-progress explosion animations
+			for(int i = 0; i < hits.size(); i++)
+				delete hits.at(i);
+			hits.clear();
 
 			stats.reset();
 			gameOver = false;
@@ -722,22 +718,26 @@ int main(void)
 					stats.decreaseScore(charCount/2);
 				}
 				blocks.erase(blocks.begin() + i);
+				i--; // adjust index so the shifted-down block is not skipped
 			}
 		}
 
 		//******* Remove hits (a.k.a explosions) that have finished playing ********//
 		for(int i = 0; i < hits.size(); i++){
-			if(hits.at(i)->finished == true)
+			if(hits.at(i)->finished == true){
+				delete hits.at(i); // free the Hit allocated with new
 				hits.erase(hits.begin() + i);
+				i--; // adjust index so the shifted-down hit is not skipped
+			}
 		}
 
 		kaboomUsed = false; // reset kaboom flag
 
 		// ********** Background Music Play/No Play ******************
-		if(!gameData->playMusic)
-			fmod_sys->playSound(bgMusic, 0, false, &bgChan); // Play background music
-		else
-			fmod_sys->playSound(NULL, 0, false, &bgChan); // No  background music
+		// Pause/resume the already-playing background channel instead of
+		// restarting the stream every frame.
+		if(bgChan)
+			bgChan->setPaused(!gameData->playMusic);
 
 		//*********** Troubleshooting *************************************************
 		//printf(stats.to_string().c_str());

@@ -16,7 +16,6 @@ TextBlock::TextBlock(int x, int y, int w, int h, std::string s, std::map<std::st
 	colors.push_back("white"), colors.push_back("blue"), colors.push_back("green");
 	colors.push_back("yellow"), colors.push_back("purple"), colors.push_back("red");
 	colors.push_back("orange");
-	srand(time(0));
 	color = colors.at(rand() % 7);
 	fontWidth = 23;
 	fontHeight = 25;
