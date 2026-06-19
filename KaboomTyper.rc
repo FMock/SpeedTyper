@@ -1,0 +1,5 @@
+// KaboomTyper.rc - application resource script
+// The application icon (extracted from the original KaboomTyper.exe).
+// Lowest-id icon resource is used by Windows Explorer as the app icon.
+
+1 ICON "KaboomTyper.ico"
