@@ -14,6 +14,7 @@ enum facing{LEFT, RIGHT, UP, DOWN };
 Hit::Hit(int x, int y, int w, int h, 
 	                       AnimationData &aData, int moveDir):Sprite(x, y, w, h){
 	type = "hit";
+	finished = false;
 	collieded = false;
 	isDead = false;
 	isHit = false;

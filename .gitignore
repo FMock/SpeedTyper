@@ -21,6 +21,7 @@ x64/
 *.VC.db
 *.VC.opendb
 *.aps
+CLAUDE.md
 
 # NOTE: KaboomTyper.sln / *.vcxproj / *.filters and the third_party/ folder
 # are intentionally tracked so the project can be cloned and built directly.
